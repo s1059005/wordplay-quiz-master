@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { parseCSV } from "@/utils/quizUtils";
 import { VocabWord } from "@/types";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { Upload } from "lucide-react";
 
 interface FileUploaderProps {
