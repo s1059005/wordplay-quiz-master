@@ -4,9 +4,10 @@ import FileUploader from "@/components/FileUploader";
 import QuizSettings from "@/components/QuizSettings";
 import QuizQuestion from "@/components/QuizQuestion";
 import QuizResult from "@/components/QuizResult";
+import QuizHistory from "@/components/QuizHistory";
 import UserSelector from "@/components/UserSelector";
-import { VocabWord, QuizState, QuizSettings as QuizSettingsType, User } from "@/types";
-import { checkAnswer } from "@/utils/quizUtils";
+import { VocabWord, QuizState, QuizSettings as QuizSettingsType, User, QuizResult as QuizResultType } from "@/types";
+import { calculateScore } from "@/utils/quizUtils";
 import { v4 as uuidv4 } from "uuid";
 
 // Local storage key for users
@@ -16,6 +17,7 @@ const Index = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [quizState, setQuizState] = useState<QuizState | null>(null);
+  const [showHistory, setShowHistory] = useState<boolean>(false);
   
   // Initialize users from local storage
   useEffect(() => {
@@ -23,11 +25,18 @@ const Index = () => {
     if (storedUsers) {
       try {
         const parsedUsers = JSON.parse(storedUsers);
-        setUsers(parsedUsers);
+        
+        // Ensure each user has a quizHistory array (for backward compatibility)
+        const updatedUsers = parsedUsers.map((user: User) => ({
+          ...user,
+          quizHistory: user.quizHistory || []
+        }));
+        
+        setUsers(updatedUsers);
         
         // Auto-select first user if available
-        if (parsedUsers.length > 0 && !selectedUserId) {
-          setSelectedUserId(parsedUsers[0].id);
+        if (updatedUsers.length > 0 && !selectedUserId) {
+          setSelectedUserId(updatedUsers[0].id);
         }
       } catch (error) {
         console.error("Error parsing stored users:", error);
@@ -44,12 +53,14 @@ const Index = () => {
     const newUser: User = {
       id: uuidv4(),
       name,
-      words: []
+      words: [],
+      quizHistory: []
     };
     
     setUsers(prev => [...prev, newUser]);
     setSelectedUserId(newUser.id);
     setQuizState(null);
+    setShowHistory(false);
   };
   
   const handleDeleteUser = (userId: string) => {
@@ -58,12 +69,14 @@ const Index = () => {
     if (selectedUserId === userId) {
       setSelectedUserId(null);
       setQuizState(null);
+      setShowHistory(false);
     }
   };
   
   const handleSelectUser = (userId: string) => {
     setSelectedUserId(userId);
     setQuizState(null);
+    setShowHistory(false);
   };
   
   const handleWordsLoaded = (loadedWords: VocabWord[], fileName: string) => {
@@ -86,6 +99,7 @@ const Index = () => {
     
     // Reset quiz state when new words are loaded
     setQuizState(null);
+    setShowHistory(false);
   };
   
   const handleStartQuiz = (settings: QuizSettingsType, selectedWords: VocabWord[]) => {
@@ -96,6 +110,7 @@ const Index = () => {
       answers: [],
       isComplete: false
     });
+    setShowHistory(false);
   };
   
   const handleAnswer = (answer: string, isCorrect: boolean) => {
@@ -130,7 +145,38 @@ const Index = () => {
   };
   
   const handleRestartQuiz = () => {
+    // Save the quiz result before restarting
+    if (quizState?.isComplete && selectedUserId) {
+      const score = calculateScore(quizState.answers);
+      
+      // Create a new quiz result entry
+      const quizResult: QuizResultType = {
+        date: new Date().toISOString(),
+        score,
+        fileName: users.find(u => u.id === selectedUserId)?.lastFileUpload?.fileName
+      };
+      
+      // Add the quiz result to the user's history
+      setUsers(prev => prev.map(user => {
+        if (user.id === selectedUserId) {
+          return {
+            ...user,
+            quizHistory: [...(user.quizHistory || []), quizResult]
+          };
+        }
+        return user;
+      }));
+    }
+    
     setQuizState(null);
+    setShowHistory(false);
+  };
+  
+  const handleToggleHistory = () => {
+    setShowHistory(prev => !prev);
+    if (quizState) {
+      setQuizState(null);
+    }
   };
   
   // Get the selected user's words
@@ -139,6 +185,8 @@ const Index = () => {
     : [];
   
   const selectedUser = users.find(user => user.id === selectedUserId);
+  
+  const selectedUserHistory = selectedUser?.quizHistory || [];
   
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
@@ -157,7 +205,7 @@ const Index = () => {
       </header>
       
       <main className="flex-1 container max-w-4xl px-4 pb-12">
-        {!quizState ? (
+        {!quizState && !showHistory ? (
           <>
             <div className="mb-8">
               <UserSelector 
@@ -170,20 +218,50 @@ const Index = () => {
             </div>
             
             {selectedUserId && (
-              <div className="grid gap-8 md:grid-cols-2">
-                <FileUploader 
-                  onWordsLoaded={handleWordsLoaded} 
-                  selectedUser={selectedUser}
-                />
-                <QuizSettings words={selectedUserWords} onStartQuiz={handleStartQuiz} />
-              </div>
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">Start Quiz</h2>
+                  
+                  {selectedUserHistory.length > 0 && (
+                    <button
+                      onClick={handleToggleHistory}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                    >
+                      View Quiz History
+                    </button>
+                  )}
+                </div>
+                
+                <div className="grid gap-8 md:grid-cols-2">
+                  <FileUploader 
+                    onWordsLoaded={handleWordsLoaded} 
+                    selectedUser={selectedUser}
+                  />
+                  <QuizSettings words={selectedUserWords} onStartQuiz={handleStartQuiz} />
+                </div>
+              </>
             )}
           </>
-        ) : quizState.isComplete ? (
+        ) : showHistory ? (
+          <div className="w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Quiz History</h2>
+              
+              <button
+                onClick={handleToggleHistory}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+              >
+                Back to Quiz
+              </button>
+            </div>
+            
+            <QuizHistory history={selectedUserHistory} />
+          </div>
+        ) : quizState?.isComplete ? (
           <QuizResult quizState={quizState} onRestart={handleRestartQuiz} />
         ) : (
           <QuizQuestion
-            quizState={quizState}
+            quizState={quizState!}
             onAnswer={handleAnswer}
             onComplete={handleCompleteQuiz}
           />

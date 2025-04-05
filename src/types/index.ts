@@ -5,6 +5,16 @@ export interface VocabWord {
   english: string;
 }
 
+export interface QuizResult {
+  date: string; // ISO string
+  score: {
+    correct: number;
+    total: number;
+    percentage: number;
+  };
+  fileName?: string; // Name of the vocabulary file used
+}
+
 export interface User {
   id: string;
   name: string;
@@ -13,6 +23,7 @@ export interface User {
     fileName: string;
     uploadDate: string;
   };
+  quizHistory: QuizResult[];
 }
 
 export interface QuizState {
