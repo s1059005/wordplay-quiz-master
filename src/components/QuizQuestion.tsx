@@ -104,7 +104,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Type the English word"
-                className={`text-lg text-center ${
+                className={`text-2xl md:text-3xl text-center p-4 h-auto ${
                   isCorrect === true
                     ? "border-green-500 focus-visible:ring-green-500"
                     : isCorrect === false

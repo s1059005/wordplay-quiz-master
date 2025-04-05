@@ -5,6 +5,12 @@ export interface VocabWord {
   english: string;
 }
 
+export interface User {
+  id: string;
+  name: string;
+  words: VocabWord[];
+}
+
 export interface QuizState {
   words: VocabWord[];
   currentWordIndex: number;
