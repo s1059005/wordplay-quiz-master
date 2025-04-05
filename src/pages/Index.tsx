@@ -46,7 +46,9 @@ const Index = () => {
   
   // Save users to local storage whenever they change
   useEffect(() => {
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    if (users.length > 0) {
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    }
   }, [users]);
   
   const handleAddUser = (name: string) => {
@@ -156,16 +158,24 @@ const Index = () => {
         fileName: users.find(u => u.id === selectedUserId)?.lastFileUpload?.fileName
       };
       
-      // Add the quiz result to the user's history
-      setUsers(prev => prev.map(user => {
-        if (user.id === selectedUserId) {
-          return {
-            ...user,
-            quizHistory: [...(user.quizHistory || []), quizResult]
-          };
-        }
-        return user;
-      }));
+      // Add the quiz result to the user's history and save to localStorage
+      setUsers(prev => {
+        const updatedUsers = prev.map(user => {
+          if (user.id === selectedUserId) {
+            const updatedUser = {
+              ...user,
+              quizHistory: [...(user.quizHistory || []), quizResult]
+            };
+            return updatedUser;
+          }
+          return user;
+        });
+        
+        // Immediately update localStorage with the new quiz history
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updatedUsers));
+        
+        return updatedUsers;
+      });
     }
     
     setQuizState(null);
