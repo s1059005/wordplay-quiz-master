@@ -66,13 +66,20 @@ const Index = () => {
     setQuizState(null);
   };
   
-  const handleWordsLoaded = (loadedWords: VocabWord[]) => {
+  const handleWordsLoaded = (loadedWords: VocabWord[], fileName: string) => {
     if (!selectedUserId) return;
     
-    // Update the selected user's words
+    // Update the selected user's words and file information
     setUsers(prev => prev.map(user => {
       if (user.id === selectedUserId) {
-        return { ...user, words: loadedWords };
+        return { 
+          ...user, 
+          words: loadedWords,
+          lastFileUpload: {
+            fileName,
+            uploadDate: new Date().toISOString()
+          }
+        };
       }
       return user;
     }));
@@ -164,7 +171,10 @@ const Index = () => {
             
             {selectedUserId && (
               <div className="grid gap-8 md:grid-cols-2">
-                <FileUploader onWordsLoaded={handleWordsLoaded} />
+                <FileUploader 
+                  onWordsLoaded={handleWordsLoaded} 
+                  selectedUser={selectedUser}
+                />
                 <QuizSettings words={selectedUserWords} onStartQuiz={handleStartQuiz} />
               </div>
             )}

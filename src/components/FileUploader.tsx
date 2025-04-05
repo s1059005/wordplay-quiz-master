@@ -3,15 +3,16 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { parseCSV } from "@/utils/quizUtils";
-import { VocabWord } from "@/types";
+import { VocabWord, User } from "@/types";
 import { toast } from "sonner";
 import { Upload } from "lucide-react";
 
 interface FileUploaderProps {
-  onWordsLoaded: (words: VocabWord[]) => void;
+  onWordsLoaded: (words: VocabWord[], fileName: string) => void;
+  selectedUser?: User | null;
 }
 
-const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded }) => {
+const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser }) => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
   const handleFileChange = (file: File) => {
@@ -26,8 +27,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded }) => {
           return;
         }
         
-        onWordsLoaded(words);
-        toast.success(`Loaded ${words.length} vocabulary words`);
+        onWordsLoaded(words, file.name);
+        toast.success(`Loaded ${words.length} vocabulary words from ${file.name}`);
       } catch (error) {
         console.error("Error parsing CSV file:", error);
         toast.error("Error parsing file. Please check format and try again.");
@@ -61,6 +62,14 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded }) => {
         <CardTitle className="text-xl text-center">Upload Vocabulary List</CardTitle>
       </CardHeader>
       <CardContent>
+        {selectedUser?.lastFileUpload && (
+          <div className="mb-4 p-3 bg-blue-50 rounded-md border border-blue-200">
+            <p className="text-sm font-medium">Current file: {selectedUser.lastFileUpload.fileName}</p>
+            <p className="text-xs text-muted-foreground">
+              Uploaded on: {new Date(selectedUser.lastFileUpload.uploadDate).toLocaleString()}
+            </p>
+          </div>
+        )}
         <div
           className={`border-2 border-dashed rounded-lg p-8 text-center ${
             isDragging ? "border-primary bg-primary/5" : "border-border"

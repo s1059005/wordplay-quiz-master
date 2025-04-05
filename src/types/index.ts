@@ -9,6 +9,10 @@ export interface User {
   id: string;
   name: string;
   words: VocabWord[];
+  lastFileUpload?: {
+    fileName: string;
+    uploadDate: string;
+  };
 }
 
 export interface QuizState {
