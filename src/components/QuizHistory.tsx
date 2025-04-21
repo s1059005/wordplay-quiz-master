@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Card,
@@ -36,7 +35,7 @@ const QuizHistory: React.FC<QuizHistoryProps> = ({ history }) => {
         relative: formatDistanceToNow(date, { addSuffix: true })
       };
     } catch (error) {
-      return { fullDate: dateString, relative: "unknown time" };
+      return { fullDate: dateString, relative: "未知時間" };
     }
   };
 
@@ -44,11 +43,11 @@ const QuizHistory: React.FC<QuizHistoryProps> = ({ history }) => {
     return (
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-xl text-center">Quiz History</CardTitle>
+          <CardTitle className="text-xl text-center">測驗歷史</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-center text-muted-foreground py-4">
-            No quiz history available yet. Complete a quiz to see your results here.
+            尚無測驗歷史。完成一次測驗後即可在此查看結果。
           </p>
         </CardContent>
       </Card>
@@ -58,17 +57,17 @@ const QuizHistory: React.FC<QuizHistoryProps> = ({ history }) => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-xl text-center">Quiz History</CardTitle>
+        <CardTitle className="text-xl text-center">測驗歷史</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[120px]">Date</TableHead>
-                <TableHead>Vocabulary</TableHead>
-                <TableHead className="w-[100px] text-right">Score</TableHead>
-                <TableHead className="w-[120px] text-right">Correct/Total</TableHead>
+                <TableHead className="w-[120px]">日期</TableHead>
+                <TableHead>詞彙表</TableHead>
+                <TableHead className="w-[100px] text-right">分數</TableHead>
+                <TableHead className="w-[120px] text-right">答對/總題數</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -81,7 +80,7 @@ const QuizHistory: React.FC<QuizHistoryProps> = ({ history }) => {
                       <div className="text-sm">{relative}</div>
                       <div className="text-xs text-muted-foreground">{fullDate}</div>
                     </TableCell>
-                    <TableCell>{result.fileName || "Custom vocabulary"}</TableCell>
+                    <TableCell>{result.fileName || "自訂詞彙"}</TableCell>
                     <TableCell className="text-right font-medium">
                       {result.score.percentage}%
                     </TableCell>

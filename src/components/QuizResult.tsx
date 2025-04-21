@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -31,13 +30,13 @@ const QuizResult: React.FC<QuizResultProps> = ({ quizState, onRestart }) => {
     <div className="w-full max-w-2xl mx-auto">
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Quiz Results</CardTitle>
+          <CardTitle className="text-2xl text-center">測驗結果</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-center py-4">
             <h3 className="text-4xl font-bold mb-2">{score.percentage}%</h3>
             <p className="text-muted-foreground">
-              You got {score.correct} out of {score.total} questions correct
+              您答對了 {score.total} 題中的 {score.correct} 題
             </p>
           </div>
           
@@ -46,10 +45,10 @@ const QuizResult: React.FC<QuizResultProps> = ({ quizState, onRestart }) => {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[50px]">#</TableHead>
-                  <TableHead>Chinese</TableHead>
-                  <TableHead>Correct Answer</TableHead>
-                  <TableHead>Your Answer</TableHead>
-                  <TableHead className="w-[50px]">Result</TableHead>
+                  <TableHead>中文</TableHead>
+                  <TableHead>正確答案</TableHead>
+                  <TableHead>您的答案</TableHead>
+                  <TableHead className="w-[50px]">結果</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -80,7 +79,7 @@ const QuizResult: React.FC<QuizResultProps> = ({ quizState, onRestart }) => {
         </CardContent>
         <CardFooter>
           <Button onClick={onRestart} className="w-full">
-            Start New Quiz
+            開始新測驗
           </Button>
         </CardFooter>
       </Card>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,12 +17,12 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ words, onStartQuiz }) => {
 
   const handleStartQuiz = () => {
     if (words.length === 0) {
-      toast.error("Please upload a vocabulary list first");
+      toast.error("請先上傳詞彙表");
       return;
     }
 
     if (words.length < questionCount) {
-      toast.error(`You only have ${words.length} words. Please select fewer questions.`);
+      toast.error(`您只有 ${words.length} 個單字。請選擇較少的題目數量。`);
       return;
     }
 
@@ -36,12 +35,12 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ words, onStartQuiz }) => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-xl text-center">Quiz Settings</CardTitle>
+        <CardTitle className="text-xl text-center">測驗設定</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
           <div>
-            <h3 className="text-sm font-medium mb-3">Number of Questions</h3>
+            <h3 className="text-sm font-medium mb-3">題目數量</h3>
             <RadioGroup
               defaultValue="10"
               className="flex space-x-4"
@@ -49,18 +48,18 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ words, onStartQuiz }) => {
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="10" id="q10" />
-                <Label htmlFor="q10">10 Questions</Label>
+                <Label htmlFor="q10">10 題</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="20" id="q20" />
-                <Label htmlFor="q20">20 Questions</Label>
+                <Label htmlFor="q20">20 題</Label>
               </div>
             </RadioGroup>
           </div>
 
           <div className="pt-4">
             <Button onClick={handleStartQuiz} className="w-full">
-              Start Quiz
+              開始測驗
             </Button>
           </div>
         </div>

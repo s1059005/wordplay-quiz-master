@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,15 +22,15 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
         const words = parseCSV(csvContent);
         
         if (words.length === 0) {
-          toast.error("No valid words found in the file");
+          toast.error("檔案中沒有找到有效的單字");
           return;
         }
         
         onWordsLoaded(words, file.name);
-        toast.success(`Loaded ${words.length} vocabulary words from ${file.name}`);
+        toast.success(`已從 ${file.name} 載入 ${words.length} 個單字`);
       } catch (error) {
         console.error("Error parsing CSV file:", error);
-        toast.error("Error parsing file. Please check format and try again.");
+        toast.error("解析檔案時發生錯誤。請檢查格式後重試。");
       }
     };
     
@@ -59,14 +58,14 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-xl text-center">Upload Vocabulary List</CardTitle>
+        <CardTitle className="text-xl text-center">上傳詞彙表</CardTitle>
       </CardHeader>
       <CardContent>
         {selectedUser?.lastFileUpload && (
           <div className="mb-4 p-3 bg-blue-50 rounded-md border border-blue-200">
-            <p className="text-sm font-medium">Current file: {selectedUser.lastFileUpload.fileName}</p>
+            <p className="text-sm font-medium">目前檔案：{selectedUser.lastFileUpload.fileName}</p>
             <p className="text-xs text-muted-foreground">
-              Uploaded on: {new Date(selectedUser.lastFileUpload.uploadDate).toLocaleString()}
+              上傳時間：{new Date(selectedUser.lastFileUpload.uploadDate).toLocaleString()}
             </p>
           </div>
         )}
@@ -80,10 +79,10 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
         >
           <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <p className="mb-2 text-sm text-muted-foreground">
-            Drag and drop a CSV file, or click to select
+            拖放 CSV 檔案至此，或點擊選擇檔案
           </p>
           <p className="text-xs text-muted-foreground mb-4">
-            Format: Chinese,English (one pair per line)
+            格式：中文,英文（每行一組）
           </p>
           <input
             type="file"
@@ -100,7 +99,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
             onClick={() => document.getElementById("fileInput")?.click()}
             variant="outline"
           >
-            Select File
+            選擇檔案
           </Button>
         </div>
       </CardContent>

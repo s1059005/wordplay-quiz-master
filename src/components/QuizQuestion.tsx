@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -75,16 +74,16 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
       <div className="mb-4">
         <Progress value={progress} className="h-2" />
         <div className="flex justify-between mt-1 text-sm text-muted-foreground">
-          <span>Question {quizState.currentWordIndex + 1}</span>
-          <span>of {quizState.questionCount}</span>
+          <span>第 {quizState.currentWordIndex + 1} 題</span>
+          <span>共 {quizState.questionCount} 題</span>
         </div>
       </div>
       
       <Card className="w-full">
         <CardHeader className="pb-3">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Translate to English</span>
-            <Button variant="ghost" size="icon" onClick={playAudio} title="Play pronunciation">
+            <span className="text-sm text-muted-foreground">請翻譯成英文</span>
+            <Button variant="ghost" size="icon" onClick={playAudio} title="播放發音">
               <Volume2 className="h-5 w-5" />
             </Button>
           </div>
@@ -103,7 +102,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Type the English word"
+                placeholder="請輸入英文單字"
                 className={`text-2xl md:text-3xl text-center p-4 h-auto ${
                   isCorrect === true
                     ? "border-green-500 focus-visible:ring-green-500"
@@ -123,7 +122,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
             className="w-full"
             disabled={inputValue.trim() === ""}
           >
-            Submit
+            提交答案
           </Button>
         </CardFooter>
       </Card>

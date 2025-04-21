@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +26,7 @@ const UserSelector: React.FC<UserSelectorProps> = ({
 
   const handleAddUser = () => {
     if (!newUserName.trim()) {
-      toast.error("Please enter a name");
+      toast.error("請輸入名稱");
       return;
     }
 
@@ -39,7 +38,7 @@ const UserSelector: React.FC<UserSelectorProps> = ({
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-xl text-center">User Selection</CardTitle>
+        <CardTitle className="text-xl text-center">使用者選擇</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -58,7 +57,7 @@ const UserSelector: React.FC<UserSelectorProps> = ({
                   <div className="flex flex-col">
                     <span className="font-medium">{user.name}</span>
                     <span className="text-xs text-muted-foreground">
-                      {user.words.length} vocabulary words
+                      {user.words.length} 個單字
                     </span>
                   </div>
                   <Button
@@ -77,7 +76,7 @@ const UserSelector: React.FC<UserSelectorProps> = ({
             </div>
           ) : (
             <div className="text-center py-4 text-muted-foreground">
-              No users yet. Add a new user to get started.
+              尚未有使用者。新增使用者以開始使用。
             </div>
           )}
 
@@ -86,12 +85,12 @@ const UserSelector: React.FC<UserSelectorProps> = ({
               <Input
                 value={newUserName}
                 onChange={(e) => setNewUserName(e.target.value)}
-                placeholder="Enter user name"
+                placeholder="輸入使用者名稱"
                 className="flex-1"
                 autoFocus
               />
               <Button variant="default" onClick={handleAddUser}>
-                Add
+                新增
               </Button>
               <Button
                 variant="outline"
@@ -100,7 +99,7 @@ const UserSelector: React.FC<UserSelectorProps> = ({
                   setNewUserName("");
                 }}
               >
-                Cancel
+                取消
               </Button>
             </div>
           ) : (
@@ -110,7 +109,7 @@ const UserSelector: React.FC<UserSelectorProps> = ({
               onClick={() => setIsAddingUser(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add New User
+              新增使用者
             </Button>
           )}
         </div>
