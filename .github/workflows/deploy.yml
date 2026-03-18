@@ -29,11 +29,11 @@ jobs:
       - name: 設定 Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: 'npm'
 
-      - name: 安裝依賴項
-        run: npm install
+      - name: 安裝依賴項 (使用 npm ci 以確保環境一致性)
+        run: npm ci --legacy-peer-deps
 
       - name: 構建專案
         run: npm run build
