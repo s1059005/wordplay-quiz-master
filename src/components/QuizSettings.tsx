@@ -54,6 +54,10 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ words, onStartQuiz }) => {
                 <RadioGroupItem value="20" id="q20" />
                 <Label htmlFor="q20">20 題</Label>
               </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="50" id="q50" />
+                <Label htmlFor="q50">50 題</Label>
+              </div>
             </RadioGroup>
           </div>
 

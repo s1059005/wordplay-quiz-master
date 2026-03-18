@@ -20,15 +20,13 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState<string>("");
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [isShowingResult, setIsShowingResult] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const currentWord = quizState.words[quizState.currentWordIndex];
   const progress = ((quizState.currentWordIndex) / quizState.questionCount) * 100;
   
   useEffect(() => {
-    // Focus input when component mounts or new word is shown
-    inputRef.current?.focus();
-    
     // Speak the word automatically when a new word is shown
     if (currentWord) {
       speakWord(currentWord.english);
@@ -37,16 +35,21 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
     // Reset state for new word
     setInputValue("");
     setIsCorrect(null);
+    setIsShowingResult(false);
   }, [currentWord, quizState.currentWordIndex]);
+
+  // Focus input whenever it's not showing result (re-enabled)
+  useEffect(() => {
+    if (!isShowingResult) {
+      // Small timeout to ensure the DOM has updated and input is no longer disabled
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [isShowingResult]);
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!currentWord || inputValue.trim() === "") return;
-    
-    const correct = checkAnswer(inputValue, currentWord.english);
-    setIsCorrect(correct);
-    
+  const proceedToNext = (correct: boolean) => {
     onAnswer(inputValue.trim(), correct);
     
     // Move to next word or complete quiz after answering
@@ -54,10 +57,38 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
       onComplete();
     }
   };
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
+    if (!currentWord) return;
+
+    // 如果正在顯示結果，且是錯誤的，再次點擊/按下 Enter 則進入下一題
+    if (isShowingResult) {
+      if (isCorrect === false) {
+        proceedToNext(false);
+      }
+      return;
+    }
+
+    if (inputValue.trim() === "") return;
+    
+    const correct = checkAnswer(inputValue, currentWord.english);
+    setIsCorrect(correct);
+    setIsShowingResult(true);
+    
+    if (correct) {
+      // 答對則 1 秒後自動跳轉
+      setTimeout(() => {
+        proceedToNext(true);
+      }, 1000);
+    }
+    // 答錯則保持原樣，等待使用者確認
+  };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      handleSubmit(e);
+      handleSubmit();
     }
   };
   
@@ -105,24 +136,38 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
                 placeholder="請輸入英文單字"
                 className={`text-2xl md:text-3xl text-center p-4 h-auto ${
                   isCorrect === true
-                    ? "border-green-500 focus-visible:ring-green-500"
+                    ? "border-green-500 focus-visible:ring-green-500 bg-green-50"
                     : isCorrect === false
-                    ? "border-red-500 focus-visible:ring-red-500"
+                    ? "border-red-500 focus-visible:ring-red-500 bg-red-50"
                     : ""
                 }`}
                 autoComplete="off"
+                disabled={isShowingResult}
               />
             </form>
+
+            {isShowingResult && isCorrect === false && (
+              <div className="text-center animate-in fade-in slide-in-from-top-2 duration-300">
+                <p className="text-sm text-muted-foreground mb-1">正確答案：</p>
+                <p className="text-2xl font-bold text-green-600">{currentWord.english}</p>
+              </div>
+            )}
+            
+            {isShowingResult && isCorrect === true && (
+              <div className="text-center animate-in fade-in zoom-in duration-300">
+                <p className="text-xl font-bold text-green-600">答對了！</p>
+              </div>
+            )}
           </div>
         </CardContent>
         
         <CardFooter>
           <Button 
-            onClick={handleSubmit} 
-            className="w-full"
-            disabled={inputValue.trim() === ""}
+            onClick={() => handleSubmit()} 
+            className={`w-full ${isShowingResult && isCorrect === false ? "bg-blue-600 hover:bg-blue-700" : ""}`}
+            disabled={!isShowingResult && inputValue.trim() === ""}
           >
-            提交答案
+            {isShowingResult && isCorrect === false ? "下一題" : "提交答案"}
           </Button>
         </CardFooter>
       </Card>
