@@ -24,6 +24,7 @@ export interface User {
     uploadDate: string;
   };
   quizHistory: QuizResult[];
+  passedWordIds: string[];
 }
 
 export interface QuizState {

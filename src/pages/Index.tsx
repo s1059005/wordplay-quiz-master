@@ -5,10 +5,12 @@ import QuizSettings from "@/components/QuizSettings";
 import QuizQuestion from "@/components/QuizQuestion";
 import QuizResult from "@/components/QuizResult";
 import QuizHistory from "@/components/QuizHistory";
+import QuizCompletion from "@/components/QuizCompletion";
 import UserSelector from "@/components/UserSelector";
 import { VocabWord, QuizState, QuizSettings as QuizSettingsType, User, QuizResult as QuizResultType } from "@/types";
 import { calculateScore } from "@/utils/quizUtils";
 import { v4 as uuidv4 } from "uuid";
+import { Progress } from "@/components/ui/progress";
 
 // Local storage key for users
 const USERS_STORAGE_KEY = "wordplay-quiz-users";
@@ -26,10 +28,11 @@ const Index = () => {
       try {
         const parsedUsers = JSON.parse(storedUsers);
         
-        // Ensure each user has a quizHistory array (for backward compatibility)
+        // Ensure each user has a quizHistory and passedWordIds array (for backward compatibility)
         const updatedUsers = parsedUsers.map((user: User) => ({
           ...user,
-          quizHistory: user.quizHistory || []
+          quizHistory: user.quizHistory || [],
+          passedWordIds: user.passedWordIds || []
         }));
         
         setUsers(updatedUsers);
@@ -56,7 +59,8 @@ const Index = () => {
       id: uuidv4(),
       name,
       words: [],
-      quizHistory: []
+      quizHistory: [],
+      passedWordIds: []
     };
     
     setUsers(prev => [...prev, newUser]);
@@ -134,11 +138,29 @@ const Index = () => {
       ];
       
       // Move to the next word
-      return {
+      const updatedState = {
         ...prev,
         currentWordIndex: prev.currentWordIndex + 1,
         answers: updatedAnswers
       };
+
+      // If the answer is correct, add it to the user's passed words
+      if (isCorrect && selectedUserId) {
+        setUsers(prevUsers => prevUsers.map(user => {
+          if (user.id === selectedUserId) {
+            const alreadyPassed = user.passedWordIds.includes(currentWord.id);
+            if (!alreadyPassed) {
+              return {
+                ...user,
+                passedWordIds: [...user.passedWordIds, currentWord.id]
+              };
+            }
+          }
+          return user;
+        }));
+      }
+
+      return updatedState;
     });
   };
   
@@ -188,13 +210,30 @@ const Index = () => {
       setQuizState(null);
     }
   };
+
+  const handleResetProgress = () => {
+    if (!selectedUserId) return;
+    
+    setUsers(prev => prev.map(user => {
+      if (user.id === selectedUserId) {
+        return {
+          ...user,
+          passedWordIds: []
+        };
+      }
+      return user;
+    }));
+  };
   
   // Get the selected user's words
-  const selectedUserWords = selectedUserId 
-    ? users.find(user => user.id === selectedUserId)?.words || [] 
-    : [];
-  
   const selectedUser = users.find(user => user.id === selectedUserId);
+  
+  // Filter out already passed words
+  const availableWords = selectedUser?.words.filter(
+    word => !selectedUser.passedWordIds.includes(word.id)
+  ) || [];
+  
+  const isAllWordsPassed = (selectedUser?.words?.length ?? 0) > 0 && availableWords.length === 0;
   
   const selectedUserHistory = selectedUser?.quizHistory || [];
   
@@ -208,9 +247,19 @@ const Index = () => {
           Test your English vocabulary with customized word lists
         </p>
         {selectedUser && (
-          <p className="text-center font-medium text-blue-600 mt-2">
-            Current User: {selectedUser.name}
-          </p>
+          <div className="mt-4 max-w-md mx-auto">
+            <p className="text-center font-medium text-blue-600 mb-1">
+              {selectedUser.name} 的學習進度
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <Progress value={((selectedUser.passedWordIds?.length || 0) / (selectedUser.words?.length || 1)) * 100} className="h-2 bg-blue-100" />
+              </div>
+              <span className="text-sm font-bold text-blue-700 min-w-[70px] text-right">
+                {selectedUser.passedWordIds?.length || 0} / {selectedUser.words?.length || 0}
+              </span>
+            </div>
+          </div>
         )}
       </header>
       
@@ -242,13 +291,24 @@ const Index = () => {
                   )}
                 </div>
                 
-                <div className="grid gap-8 md:grid-cols-2">
-                  <FileUploader 
-                    onWordsLoaded={handleWordsLoaded} 
-                    selectedUser={selectedUser}
+                {isAllWordsPassed ? (
+                  <QuizCompletion 
+                    userName={selectedUser?.name || ""} 
+                    onReset={handleResetProgress}
+                    onBackToHome={() => {
+                      setQuizState(null);
+                      setShowHistory(false);
+                    }}
                   />
-                  <QuizSettings words={selectedUserWords} onStartQuiz={handleStartQuiz} />
-                </div>
+                ) : (
+                  <div className="grid gap-8 md:grid-cols-2">
+                    <FileUploader 
+                      onWordsLoaded={handleWordsLoaded} 
+                      selectedUser={selectedUser}
+                    />
+                    <QuizSettings words={availableWords} onStartQuiz={handleStartQuiz} />
+                  </div>
+                )}
               </>
             )}
           </>

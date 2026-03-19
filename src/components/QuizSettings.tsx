@@ -21,15 +21,18 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ words, onStartQuiz }) => {
       return;
     }
 
-    if (words.length < questionCount) {
-      toast.error(`您只有 ${words.length} 個單字。請選擇較少的題目數量。`);
-      return;
-    }
-
-    // Shuffle and select words based on question count
-    const shuffledWords = shuffleArray(words).slice(0, questionCount);
+    // Determine the actual number of questions (limited by available words)
+    const actualQuestionCount = Math.min(words.length, questionCount);
     
-    onStartQuiz({ questionCount }, shuffledWords);
+    // Shuffle and select words based on actual question count
+    const shuffledWords = shuffleArray(words).slice(0, actualQuestionCount);
+    
+    // Important: pass the actual count if it's less than the requested count
+    onStartQuiz({ questionCount: actualQuestionCount }, shuffledWords);
+    
+    if (words.length < questionCount) {
+      toast.info(`剩餘單字不足，將以實有的 ${words.length} 個單字進行測驗。`);
+    }
   };
 
   return (
