@@ -56,33 +56,36 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
   };
 
   return (
-    <Card className="w-full">
+    <Card className="retro-border">
       <CardHeader>
-        <CardTitle className="text-xl text-center">上傳詞彙表</CardTitle>
+        <CardTitle className="text-xl text-center font-pixel text-primary drop-shadow-md">
+          卷軸上傳 [UPLOAD SCROLL]
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {selectedUser?.lastFileUpload && (
-          <div className="mb-4 p-3 bg-blue-50 rounded-md border border-blue-200">
-            <p className="text-sm font-medium">目前檔案：{selectedUser.lastFileUpload.fileName}</p>
-            <p className="text-xs text-muted-foreground">
-              上傳時間：{new Date(selectedUser.lastFileUpload.uploadDate).toLocaleString()}
+          <div className="mb-4 p-3 bg-black/40 border-2 border-primary/20 relative">
+            <div className="absolute -top-3 left-4 bg-background px-2 font-pixel text-[8px] text-primary/60">ACTIVE SCROLL</div>
+            <p className="font-vt323 text-primary text-lg">檔案：{selectedUser.lastFileUpload.fileName}</p>
+            <p className="font-vt323 text-primary/60 text-sm">
+              儀式時間：{new Date(selectedUser.lastFileUpload.uploadDate).toLocaleString()}
             </p>
           </div>
         )}
         <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center ${
-            isDragging ? "border-primary bg-primary/5" : "border-border"
+          className={`border-4 border-dashed p-8 text-center transition-all ${
+            isDragging ? "border-primary bg-primary/10 scale-105" : "border-primary/20 bg-black/20"
           }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <p className="mb-2 text-sm text-muted-foreground">
-            拖放 CSV 檔案至此，或點擊選擇檔案
+          <Upload className="mx-auto h-12 w-12 text-primary/40 mb-4" />
+          <p className="mb-2 font-vt323 text-xl text-primary">
+            投放 CSV 秘笈至此，或點擊開啟
           </p>
-          <p className="text-xs text-muted-foreground mb-4">
-            格式：中文,英文（每行一組）
+          <p className="font-pixel text-[8px] text-primary/40 mb-6">
+            格式: 中文, 英文 (每行一組)
           </p>
           <input
             type="file"
@@ -95,12 +98,12 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
               }
             }}
           />
-          <Button
+          <button
             onClick={() => document.getElementById("fileInput")?.click()}
-            variant="outline"
+            className="retro-button"
           >
-            選擇檔案
-          </Button>
+            開啟卷軸 [OPEN]
+          </button>
         </div>
       </CardContent>
     </Card>

@@ -36,41 +36,41 @@ const UserSelector: React.FC<UserSelectorProps> = ({
   };
 
   return (
-    <Card className="w-full">
+    <Card className="retro-border">
       <CardHeader>
-        <CardTitle className="text-xl text-center">使用者選擇</CardTitle>
+        <CardTitle className="text-xl text-center font-pixel text-primary drop-shadow-md">
+          勇者選擇 [SELECT PLAYER]
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           {users.length > 0 ? (
-            <div className="grid gap-2">
+            <div className="grid gap-4">
               {users.map((user) => (
                 <div
                   key={user.id}
-                  className={`flex items-center justify-between p-3 rounded-md cursor-pointer hover:bg-muted transition-colors ${
+                  className={`flex items-center justify-between p-4 cursor-pointer transition-all ${
                     selectedUserId === user.id
-                      ? "bg-primary/10 border border-primary"
-                      : "bg-card"
+                      ? "bg-primary/20 border-2 border-primary shadow-[0_0_10px_rgba(240,165,0,0.5)]"
+                      : "bg-black/40 border-2 border-primary/20 hover:border-primary/60"
                   }`}
                   onClick={() => onSelectUser(user.id)}
                 >
                   <div className="flex flex-col">
-                    <span className="font-medium">{user.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {user.words.length} 個單字
+                    <span className="font-pixel text-[10px] text-primary">{user.name}</span>
+                    <span className="font-vt323 text-primary/60">
+                      LV. {user.words.length} 單字儲備
                     </span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
+                  <button
+                    className="p-2 text-primary hover:text-red-500 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDeleteUser(user.id);
                     }}
                   >
-                    <Trash className="h-4 w-4" />
-                  </Button>
+                    <Trash className="h-5 w-5" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -81,36 +81,37 @@ const UserSelector: React.FC<UserSelectorProps> = ({
           )}
 
           {isAddingUser ? (
-            <div className="flex gap-2">
-              <Input
+            <div className="flex flex-col gap-4 p-4 border-2 border-dashed border-primary/30">
+              <input
                 value={newUserName}
                 onChange={(e) => setNewUserName(e.target.value)}
-                placeholder="輸入使用者名稱"
-                className="flex-1"
+                placeholder="輸入勇者之名..."
+                className="retro-input w-full"
                 autoFocus
               />
-              <Button variant="default" onClick={handleAddUser}>
-                新增
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsAddingUser(false);
-                  setNewUserName("");
-                }}
-              >
-                取消
-              </Button>
+              <div className="flex gap-4">
+                <button className="flex-1 retro-button" onClick={handleAddUser}>
+                  召喚 [OK]
+                </button>
+                <button
+                  className="flex-1 retro-button bg-red-900/20 border-red-500 text-red-400"
+                  onClick={() => {
+                    setIsAddingUser(false);
+                    setNewUserName("");
+                  }}
+                >
+                  取消 [ESC]
+                </button>
+              </div>
             </div>
           ) : (
-            <Button
-              variant="outline"
-              className="w-full"
+            <button
+              className="w-full retro-button flex items-center justify-center p-4 py-6"
               onClick={() => setIsAddingUser(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
-              新增使用者
-            </Button>
+              新勇者加入 [NEW PLAYER]
+            </button>
           )}
         </div>
       </CardContent>

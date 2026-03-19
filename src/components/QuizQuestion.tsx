@@ -101,44 +101,51 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
   if (!currentWord) return null;
   
   return (
-    <div className="w-full max-w-xl mx-auto">
-      <div className="mb-4">
-        <Progress value={progress} className="h-2" />
-        <div className="flex justify-between mt-1 text-sm text-muted-foreground">
-          <span>第 {quizState.currentWordIndex + 1} 題</span>
-          <span>共 {quizState.questionCount} 題</span>
+    <div className="w-full max-w-xl mx-auto py-8">
+      <div className="mb-6">
+        <div className="flex justify-between mb-2 font-pixel text-[10px] text-primary">
+          <span>Quest: {quizState.currentWordIndex + 1} / {quizState.questionCount}</span>
+          <span>EXP: {Math.round(progress)}%</span>
+        </div>
+        <div className="retro-progress">
+          <div 
+            className="retro-progress-inner" 
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
       
-      <Card className="w-full">
-        <CardHeader className="pb-3">
+      <Card className="retro-border">
+        <CardHeader className="pb-3 border-b-2 border-primary/30">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">請翻譯成英文</span>
-            <Button variant="ghost" size="icon" onClick={playAudio} title="播放發音">
+            <span className="font-pixel text-[10px] text-primary/80">翻譯任務: 國語 → 英語</span>
+            <Button variant="ghost" size="icon" onClick={playAudio} title="聆聽神諭" className="text-primary hover:bg-primary/20">
               <Volume2 className="h-5 w-5" />
             </Button>
           </div>
         </CardHeader>
         
-        <CardContent>
-          <div className="space-y-6">
-            <div className="text-center py-4">
-              <h2 className="text-3xl font-bold">{currentWord.chinese}</h2>
+        <CardContent className="pt-6">
+          <div className="space-y-8">
+            <div className="text-center py-4 bg-black/40 border-2 border-primary/20 relative">
+              <div className="absolute -top-3 left-4 bg-background px-2 font-pixel text-[8px] text-primary/60">TARGET</div>
+              <h2 className="text-4xl font-vt323 text-primary tracking-widest">{currentWord.chinese}</h2>
             </div>
             
-            <form onSubmit={handleSubmit}>
-              <Input
+            <form onSubmit={handleSubmit} className="relative">
+              <div className="absolute -top-3 left-4 bg-background px-2 font-pixel text-[8px] text-primary/60">INPUT</div>
+              <input
                 ref={inputRef}
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="請輸入英文單字"
-                className={`text-2xl md:text-3xl text-center p-4 h-auto ${
+                placeholder="輸入英文單字..."
+                className={`w-full retro-input text-center py-4 ${
                   isCorrect === true
-                    ? "border-green-500 focus-visible:ring-green-500 bg-green-50"
+                    ? "border-green-500 text-green-400 bg-green-900/20"
                     : isCorrect === false
-                    ? "border-red-500 focus-visible:ring-red-500 bg-red-50"
+                    ? "border-red-500 text-red-400 bg-red-900/20"
                     : ""
                 }`}
                 autoComplete="off"
@@ -146,29 +153,31 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
               />
             </form>
 
-            {isShowingResult && isCorrect === false && (
-              <div className="text-center animate-in fade-in slide-in-from-top-2 duration-300">
-                <p className="text-sm text-muted-foreground mb-1">正確答案：</p>
-                <p className="text-2xl font-bold text-green-600">{currentWord.english}</p>
-              </div>
-            )}
-            
-            {isShowingResult && isCorrect === true && (
-              <div className="text-center animate-in fade-in zoom-in duration-300">
-                <p className="text-xl font-bold text-green-600">答對了！</p>
+            {isShowingResult && (
+              <div className="bg-black/60 p-4 border-2 border-dashed border-primary/40 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                {isCorrect === false ? (
+                  <div className="text-center">
+                    <p className="font-pixel text-[10px] text-red-400 mb-2">判定失敗！正確應為：</p>
+                    <p className="text-4xl font-vt323 text-green-400 cursor-blink uppercase tracking-widest">{currentWord.english}</p>
+                  </div>
+                ) : (
+                  <div className="text-center py-2">
+                    <p className="text-3xl font-pixel text-green-400 animate-bounce">GREAT!</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </CardContent>
         
-        <CardFooter>
-          <Button 
+        <CardFooter className="pt-2 pb-6">
+          <button 
             onClick={() => handleSubmit()} 
-            className={`w-full ${isShowingResult && isCorrect === false ? "bg-blue-600 hover:bg-blue-700" : ""}`}
+            className="w-full retro-button"
             disabled={!isShowingResult && inputValue.trim() === ""}
           >
-            {isShowingResult && isCorrect === false ? "下一題" : "提交答案"}
-          </Button>
+            {isShowingResult && isCorrect === false ? "下一階段 [NEXT]" : "提交判定 [ENTER]"}
+          </button>
         </CardFooter>
       </Card>
     </div>

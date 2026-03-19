@@ -41,9 +41,11 @@ const QuizHistory: React.FC<QuizHistoryProps> = ({ history }) => {
 
   if (history.length === 0) {
     return (
-      <Card className="w-full">
+      <Card className="retro-border">
         <CardHeader>
-          <CardTitle className="text-xl text-center">測驗歷史</CardTitle>
+          <CardTitle className="text-xl text-center font-pixel text-primary drop-shadow-md">
+            尚未有冒險紀錄 [NO DATA]
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-center text-muted-foreground py-4">
@@ -55,19 +57,21 @@ const QuizHistory: React.FC<QuizHistoryProps> = ({ history }) => {
   }
 
   return (
-    <Card className="w-full">
+    <Card className="retro-border">
       <CardHeader>
-        <CardTitle className="text-xl text-center">測驗歷史</CardTitle>
+        <CardTitle className="text-xl text-center font-pixel text-primary drop-shadow-md">
+          過往冒險紀錄 [LOGS]
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border-2 border-primary/20 bg-black/20 overflow-hidden">
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[120px]">日期</TableHead>
-                <TableHead>詞彙表</TableHead>
-                <TableHead className="w-[100px] text-right">分數</TableHead>
-                <TableHead className="w-[120px] text-right">答對/總題數</TableHead>
+            <TableHeader className="bg-primary/10 font-pixel text-[8px]">
+              <TableRow className="hover:bg-transparent border-primary/20">
+                <TableHead className="w-[140px] text-primary">時間軸</TableHead>
+                <TableHead className="text-primary">卷軸名稱</TableHead>
+                <TableHead className="w-[100px] text-right text-primary">同步率</TableHead>
+                <TableHead className="w-[120px] text-right text-primary">擊破/總數</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -75,16 +79,16 @@ const QuizHistory: React.FC<QuizHistoryProps> = ({ history }) => {
                 const { fullDate, relative } = formatDate(result.date);
                 
                 return (
-                  <TableRow key={index}>
-                    <TableCell className="align-top">
-                      <div className="text-sm">{relative}</div>
-                      <div className="text-xs text-muted-foreground">{fullDate}</div>
+                  <TableRow key={index} className="border-primary/10 font-vt323 text-lg hover:bg-primary/5">
+                    <TableCell className="align-top py-4">
+                      <div className="text-primary/80 leading-tight">{relative}</div>
+                      <div className="text-xs text-primary/40 mt-1">{fullDate}</div>
                     </TableCell>
-                    <TableCell>{result.fileName || "自訂詞彙"}</TableCell>
-                    <TableCell className="text-right font-medium">
+                    <TableCell className="text-primary">{result.fileName || "無名卷軸"}</TableCell>
+                    <TableCell className="text-right font-bold text-primary">
                       {result.score.percentage}%
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right text-primary/60">
                       {result.score.correct}/{result.score.total}
                     </TableCell>
                   </TableRow>

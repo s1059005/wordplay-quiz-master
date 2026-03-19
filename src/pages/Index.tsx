@@ -238,25 +238,28 @@ const Index = () => {
   const selectedUserHistory = selectedUser?.quizHistory || [];
   
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
-      <header className="pt-8 pb-6 px-4">
-        <h1 className="text-3xl font-bold text-center text-blue-700">
-          Wordplay Quiz Master
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <header className="pt-8 pb-6 px-4 bg-black/40 border-b-4 border-primary">
+        <h1 className="text-3xl font-pixel text-center text-primary drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+          WORDPLAY QUIZ MASTER
         </h1>
-        <p className="text-center text-muted-foreground mt-2">
-          Test your English vocabulary with customized word lists
+        <p className="text-center text-primary/80 mt-2 font-vt323 text-xl">
+          Test your English vocabulary in a retro adventure!
         </p>
         {selectedUser && (
           <div className="mt-4 max-w-md mx-auto">
-            <p className="text-center font-medium text-blue-600 mb-1">
-              {selectedUser.name} 的學習進度
+            <p className="text-center font-pixel text-primary text-xs mb-2">
+              {selectedUser.name} 的修行進度
             </p>
             <div className="flex items-center gap-3">
-              <div className="flex-1">
-                <Progress value={((selectedUser.passedWordIds?.length || 0) / (selectedUser.words?.length || 1)) * 100} className="h-2 bg-blue-100" />
+              <div className="flex-1 retro-progress">
+                <div 
+                  className="retro-progress-inner" 
+                  style={{ width: `${((selectedUser.passedWordIds?.length || 0) / (selectedUser.words?.length || 1)) * 100}%` }}
+                />
               </div>
-              <span className="text-sm font-bold text-blue-700 min-w-[70px] text-right">
-                {selectedUser.passedWordIds?.length || 0} / {selectedUser.words?.length || 0}
+              <span className="text-sm font-pixel text-primary min-w-[100px] text-right">
+                {selectedUser.passedWordIds?.length || 0}/{selectedUser.words?.length || 0}
               </span>
             </div>
           </div>
@@ -284,9 +287,9 @@ const Index = () => {
                   {selectedUserHistory.length > 0 && (
                     <button
                       onClick={handleToggleHistory}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                      className="text-primary hover:text-white font-pixel text-xs flex items-center bg-black/50 px-3 py-1 border-2 border-primary"
                     >
-                      View Quiz History
+                      查看歷史紀錄 [H]
                     </button>
                   )}
                 </div>
@@ -315,13 +318,13 @@ const Index = () => {
         ) : showHistory ? (
           <div className="w-full">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Quiz History</h2>
+              <h2 className="text-xl font-pixel text-primary">冒險紀錄</h2>
               
               <button
                 onClick={handleToggleHistory}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                className="retro-button text-xs"
               >
-                Back to Quiz
+                返回 [EXIT]
               </button>
             </div>
             
