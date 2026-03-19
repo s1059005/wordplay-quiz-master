@@ -65,9 +65,9 @@ const QuizResult: React.FC<QuizResultProps> = ({ quizState, onRestart }) => {
                   return (
                     <TableRow key={word.id} className="border-primary/10 font-vt323 text-lg hover:bg-primary/5">
                       <TableCell className="text-primary/60">{index + 1}</TableCell>
-                      <TableCell className="text-primary">{word.chinese}</TableCell>
-                      <TableCell className="text-green-400">{word.english}</TableCell>
-                      <TableCell className={answer.isCorrect ? "text-primary/80" : "text-red-400"}>
+                      <TableCell className="text-primary text-xl">{word.chinese}</TableCell>
+                      <TableCell className="text-green-400 text-2xl">{word.english}</TableCell>
+                      <TableCell className={`${answer.isCorrect ? "text-primary/80" : "text-red-400"} text-2xl`}>
                         {answer.answer || "---"}
                       </TableCell>
                       <TableCell>

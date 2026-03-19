@@ -141,7 +141,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="輸入英文單字..."
-                className={`w-full retro-input text-center py-4 ${
+                className={`w-full retro-input text-center text-4xl py-4 ${
                   isCorrect === true
                     ? "border-green-500 text-green-400 bg-green-900/20"
                     : isCorrect === false
@@ -158,7 +158,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
                 {isCorrect === false ? (
                   <div className="text-center">
                     <p className="font-pixel text-[10px] text-red-400 mb-2">判定失敗！正確應為：</p>
-                    <p className="text-4xl font-vt323 text-green-400 cursor-blink uppercase tracking-widest">{currentWord.english}</p>
+                    <p className="text-4xl font-vt323 text-green-400 cursor-blink tracking-widest">{currentWord.english}</p>
                   </div>
                 ) : (
                   <div className="text-center py-2">
