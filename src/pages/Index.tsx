@@ -28,12 +28,22 @@ const Index = () => {
       try {
         const parsedUsers = JSON.parse(storedUsers);
         
-        // Ensure each user has a quizHistory and passedWordIds array (for backward compatibility)
-        const updatedUsers = parsedUsers.map((user: User) => ({
-          ...user,
-          quizHistory: user.quizHistory || [],
-          passedWordIds: user.passedWordIds || []
-        }));
+        // Ensure each user has a quizHistory and wordScores (for backward compatibility)
+        const updatedUsers = parsedUsers.map((user: User) => {
+          // Migrate old passedWordIds to wordScores
+          let wordScores = user.wordScores || {};
+          if (!user.wordScores && user.passedWordIds && user.passedWordIds.length > 0) {
+            wordScores = {};
+            user.passedWordIds.forEach((id: string) => {
+              wordScores[id] = 0; // 已通過的給 0 分
+            });
+          }
+          return {
+            ...user,
+            quizHistory: user.quizHistory || [],
+            wordScores
+          };
+        });
         
         setUsers(updatedUsers);
         
@@ -60,7 +70,7 @@ const Index = () => {
       name,
       words: [],
       quizHistory: [],
-      passedWordIds: []
+      wordScores: {}
     };
     
     setUsers(prev => [...prev, newUser]);
@@ -144,17 +154,19 @@ const Index = () => {
         answers: updatedAnswers
       };
 
-      // If the answer is correct, add it to the user's passed words
-      if (isCorrect && selectedUserId) {
+      // Update word score: correct +1, incorrect -1
+      if (selectedUserId) {
         setUsers(prevUsers => prevUsers.map(user => {
           if (user.id === selectedUserId) {
-            const alreadyPassed = user.passedWordIds.includes(currentWord.id);
-            if (!alreadyPassed) {
-              return {
-                ...user,
-                passedWordIds: [...user.passedWordIds, currentWord.id]
-              };
-            }
+            const currentScore = user.wordScores[currentWord.id] ?? -1;
+            const newScore = isCorrect ? currentScore + 1 : currentScore - 1;
+            return {
+              ...user,
+              wordScores: {
+                ...user.wordScores,
+                [currentWord.id]: newScore
+              }
+            };
           }
           return user;
         }));
@@ -218,7 +230,7 @@ const Index = () => {
       if (user.id === selectedUserId) {
         return {
           ...user,
-          passedWordIds: []
+          wordScores: {}
         };
       }
       return user;
@@ -228,10 +240,15 @@ const Index = () => {
   // Get the selected user's words
   const selectedUser = users.find(user => user.id === selectedUserId);
   
-  // Filter out already passed words
+  // Filter out already passed words (score >= 0 means passed)
   const availableWords = selectedUser?.words.filter(
-    word => !selectedUser.passedWordIds.includes(word.id)
+    word => (selectedUser.wordScores[word.id] ?? -1) < 0
   ) || [];
+  
+  // Count passed words: score >= 0
+  const passedCount = selectedUser?.words.filter(
+    word => (selectedUser.wordScores[word.id] ?? -1) >= 0
+  ).length ?? 0;
   
   const isAllWordsPassed = (selectedUser?.words?.length ?? 0) > 0 && availableWords.length === 0;
   
@@ -255,11 +272,11 @@ const Index = () => {
               <div className="flex-1 retro-progress">
                 <div 
                   className="retro-progress-inner" 
-                  style={{ width: `${((selectedUser.passedWordIds?.length || 0) / (selectedUser.words?.length || 1)) * 100}%` }}
+                  style={{ width: `${(passedCount / (selectedUser.words?.length || 1)) * 100}%` }}
                 />
               </div>
               <span className="text-sm font-pixel text-primary min-w-[100px] text-right">
-                {selectedUser.passedWordIds?.length || 0}/{selectedUser.words?.length || 0}
+                {passedCount}/{selectedUser.words?.length || 0}
               </span>
             </div>
           </div>

@@ -37,6 +37,8 @@ jobs:
 
       - name: 構建專案
         run: npm run build
+        env:
+          VITE_TTS_API_BASE_URL: ${{ secrets.VITE_TTS_API_BASE_URL }}
 
       - name: 上傳構建產物
         uses: actions/upload-pages-artifact@v3

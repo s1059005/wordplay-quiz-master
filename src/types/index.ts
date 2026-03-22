@@ -24,7 +24,8 @@ export interface User {
     uploadDate: string;
   };
   quizHistory: QuizResult[];
-  passedWordIds: string[];
+  passedWordIds?: string[];     // 向後相容用（舊資料遷移）
+  wordScores: Record<string, number>;  // 單字分數，≥ 0 表示通過
 }
 
 export interface QuizState {
