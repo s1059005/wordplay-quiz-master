@@ -159,7 +159,8 @@ const Index = () => {
         setUsers(prevUsers => prevUsers.map(user => {
           if (user.id === selectedUserId) {
             const currentScore = user.wordScores[currentWord.id] ?? -1;
-            const newScore = isCorrect ? currentScore + 1 : currentScore - 1;
+            // 答錯時扣分(增加需答對次數)，限制最多只扣到 -6 (即原先的 1 次加上最多增加的 5 次)
+            const newScore = isCorrect ? currentScore + 1 : Math.max(-6, currentScore - 1);
             return {
               ...user,
               wordScores: {
