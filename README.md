@@ -1,73 +1,93 @@
-# Welcome to your Lovable project
+# Wordplay Quiz Master (單字冒險王) 🎮
 
-## Project info
+![Logo](https://img.shields.io/badge/Status-Beta-orange?style=for-the-badge) ![Tech-React-blue?style=for-the-badge](https://img.shields.io/badge/Tech-React-blue?style=for-the-badge) ![Tech-TypeScript-blue?style=for-the-badge](https://img.shields.io/badge/Tech-TypeScript-blue?style=for-the-badge) ![Style-Tailwind-cyan?style=for-the-badge](https://img.shields.io/badge/Style-Tailwind-cyan?style=for-the-badge)
 
-**URL**: https://lovable.dev/projects/98beab43-a0c3-485a-9474-2d9ed002899a
+**Wordplay Quiz Master** 是一款結合 8-bit 復古遊戲風格與英文單字學習的測驗工具。無論你是為了檢定考試還是日常學習，都能在充滿冒險氣息的介面中愉快地累積字彙量。
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## ✨ 核心功能
 
-**Use Lovable**
+### 1. 多玩家管理 👤
+- 支援建立多個獨立的使用者帳號。
+- 每個玩家擁有各自的進度追蹤、單字庫以及歷史紀錄。
+- 資料本地化儲存（`localStorage`），無需連網即可保存進度。
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/98beab43-a0c3-485a-9474-2d9ed002899a) and start prompting.
+### 2. 復古冒險風格 UI 🏰
+- 採用 **Pixel Art** (像素風) 字體設計。
+- 具備動態進度條、復古按鈕以及沈浸式背景。
+- 提供如「卷軸上傳」、「冒險紀錄」等充滿 RPG 元素的專用語彙。
 
-Changes made via Lovable will be committed automatically to this repo.
+### 3. 智慧評測機制 (動態難度) 🧠
+系統會根據你的表現動態調整複習頻率：
+- **新單字**：初始分數為 -1，只需答對 1 次即可通過。
+- **通過標準**：累積得分達到 **0 分**以上即視為掌握該單字，系統會自動在下次測驗中移除。
+- **答錯懲罰**：答錯時分數減 1，最高扣至 **-3 分**。
+  - *意義*：這代表最難的單字需要連續答對 3 次才能「擊敗(通過)」。
 
-**Use your preferred IDE**
+### 4. 卷軸上傳 (單字匯入) 📜
+- 支援 `.csv` 或 `.txt` 檔案格式。
+- 單字秘笈格式：`中文意義, 英文單字` (每行一組，逗號分隔)。
+- 簡單拖放即可完成匯入。
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 5. 冒險紀錄 (History) 📊
+- 詳細記錄每次挑戰的日期、正確率與使用的單字庫。
+- 提供數據視覺化圖表，讓你一眼看出自己的進步趨勢。
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 🛠 技術棧
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- **核心框架**：[React](https://reactjs.org/) + [Vite](https://vitejs.dev/)
+- **語言**：[TypeScript](https://www.typescriptlang.org/)
+- **UI 組件**：[Shadcn UI](https://ui.shadcn.com/) (基於 Radix UI)
+- **樣式控制**：[Tailwind CSS](https://tailwindcss.com/)
+- **圖表與視覺化**：[Recharts](https://recharts.org/)
+- **圖示**：[Lucide React](https://lucide.dev/)
+- **狀態管理**：React Hooks (`useState`, `useEffect`)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🚀 快速開始
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+### 環境要求
+- 已安裝 Node.js (建議 v18 以上)
 
-**Edit a file directly in GitHub**
+### 安裝步驟
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. **複製專案**
+   ```bash
+   git clone <project-url>
+   cd wordplay-quiz-master
+   ```
 
-**Use GitHub Codespaces**
+2. **安裝依賴**
+   ```bash
+   npm install
+   ```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+3. **啟動開發伺服器**
+   ```bash
+   npm run dev
+   ```
 
-## What technologies are used for this project?
+4. **開啟瀏覽器**
+   訪問 `http://localhost:5173` 即可開始你的英語冒險！
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📂 專案結構簡述
 
-## How can I deploy this project?
+- `src/components`: 核心 UI 組件（上傳器、測驗題、歷史紀錄等）。
+- `src/pages`: 主要是 `Index.tsx` 入口頁面。
+- `src/utils`: 單字解析與評分邏輯。
+- `src/types`: TypeScript 型別定義。
+- `src/skills`: AI 工具擴充功能。
 
-Simply open [Lovable](https://lovable.dev/projects/98beab43-a0c3-485a-9474-2d9ed002899a) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## 📜 授權
 
-Yes it is!
+此專案採用 MIT 授權。
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+© 2025 Wordplay Quiz Master - 助你在字彙冒險中脫穎而出！
