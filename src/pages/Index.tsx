@@ -20,14 +20,14 @@ const Index = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [quizState, setQuizState] = useState<QuizState | null>(null);
   const [showHistory, setShowHistory] = useState<boolean>(false);
-  
+
   // Initialize users from local storage
   useEffect(() => {
     const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
     if (storedUsers) {
       try {
         const parsedUsers = JSON.parse(storedUsers);
-        
+
         // Ensure each user has a quizHistory and wordScores (for backward compatibility)
         const updatedUsers = parsedUsers.map((user: User) => {
           // Migrate old passedWordIds to wordScores
@@ -44,9 +44,9 @@ const Index = () => {
             wordScores
           };
         });
-        
+
         setUsers(updatedUsers);
-        
+
         // Auto-select first user if available
         if (updatedUsers.length > 0 && !selectedUserId) {
           setSelectedUserId(updatedUsers[0].id);
@@ -56,14 +56,14 @@ const Index = () => {
       }
     }
   }, []);
-  
+
   // Save users to local storage whenever they change
   useEffect(() => {
     if (users.length > 0) {
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
     }
   }, [users]);
-  
+
   const handleAddUser = (name: string) => {
     const newUser: User = {
       id: uuidv4(),
@@ -72,37 +72,37 @@ const Index = () => {
       quizHistory: [],
       wordScores: {}
     };
-    
+
     setUsers(prev => [...prev, newUser]);
     setSelectedUserId(newUser.id);
     setQuizState(null);
     setShowHistory(false);
   };
-  
+
   const handleDeleteUser = (userId: string) => {
     setUsers(prev => prev.filter(user => user.id !== userId));
-    
+
     if (selectedUserId === userId) {
       setSelectedUserId(null);
       setQuizState(null);
       setShowHistory(false);
     }
   };
-  
+
   const handleSelectUser = (userId: string) => {
     setSelectedUserId(userId);
     setQuizState(null);
     setShowHistory(false);
   };
-  
+
   const handleWordsLoaded = (loadedWords: VocabWord[], fileName: string) => {
     if (!selectedUserId) return;
-    
+
     // Update the selected user's words and file information
     setUsers(prev => prev.map(user => {
       if (user.id === selectedUserId) {
-        return { 
-          ...user, 
+        return {
+          ...user,
           words: loadedWords,
           lastFileUpload: {
             fileName,
@@ -112,12 +112,12 @@ const Index = () => {
       }
       return user;
     }));
-    
+
     // Reset quiz state when new words are loaded
     setQuizState(null);
     setShowHistory(false);
   };
-  
+
   const handleStartQuiz = (settings: QuizSettingsType, selectedWords: VocabWord[]) => {
     setQuizState({
       words: selectedWords,
@@ -128,15 +128,15 @@ const Index = () => {
     });
     setShowHistory(false);
   };
-  
+
   const handleAnswer = (answer: string, isCorrect: boolean) => {
     if (!quizState) return;
-    
+
     const currentWord = quizState.words[quizState.currentWordIndex];
-    
+
     setQuizState(prev => {
       if (!prev) return null;
-      
+
       // Add the answer to the list
       const updatedAnswers = [
         ...prev.answers,
@@ -146,7 +146,7 @@ const Index = () => {
           isCorrect
         }
       ];
-      
+
       // Move to the next word
       const updatedState = {
         ...prev,
@@ -159,8 +159,8 @@ const Index = () => {
         setUsers(prevUsers => prevUsers.map(user => {
           if (user.id === selectedUserId) {
             const currentScore = user.wordScores[currentWord.id] ?? -1;
-            // 答錯時扣分(增加需答對次數)，限制最多只扣到 -6 (即原先的 1 次加上最多增加的 5 次)
-            const newScore = isCorrect ? currentScore + 1 : Math.max(-6, currentScore - 1);
+            // 答錯時扣分(增加需答對次數)，限制最多只扣到 -3 (即原先的 1 次加上最多增加的 2 次)
+            const newScore = isCorrect ? currentScore + 1 : Math.max(-3, currentScore - 1);
             return {
               ...user,
               wordScores: {
@@ -176,23 +176,23 @@ const Index = () => {
       return updatedState;
     });
   };
-  
+
   const handleCompleteQuiz = () => {
     setQuizState(prev => prev ? { ...prev, isComplete: true } : null);
   };
-  
+
   const handleRestartQuiz = () => {
     // Save the quiz result before restarting
     if (quizState?.isComplete && selectedUserId) {
       const score = calculateScore(quizState.answers);
-      
+
       // Create a new quiz result entry
       const quizResult: QuizResultType = {
         date: new Date().toISOString(),
         score,
         fileName: users.find(u => u.id === selectedUserId)?.lastFileUpload?.fileName
       };
-      
+
       // Add the quiz result to the user's history and save to localStorage
       setUsers(prev => {
         const updatedUsers = prev.map(user => {
@@ -205,18 +205,18 @@ const Index = () => {
           }
           return user;
         });
-        
+
         // Immediately update localStorage with the new quiz history
         localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updatedUsers));
-        
+
         return updatedUsers;
       });
     }
-    
+
     setQuizState(null);
     setShowHistory(false);
   };
-  
+
   const handleToggleHistory = () => {
     setShowHistory(prev => !prev);
     if (quizState) {
@@ -226,7 +226,7 @@ const Index = () => {
 
   const handleResetProgress = () => {
     if (!selectedUserId) return;
-    
+
     setUsers(prev => prev.map(user => {
       if (user.id === selectedUserId) {
         return {
@@ -237,24 +237,24 @@ const Index = () => {
       return user;
     }));
   };
-  
+
   // Get the selected user's words
   const selectedUser = users.find(user => user.id === selectedUserId);
-  
+
   // Filter out already passed words (score >= 0 means passed)
   const availableWords = selectedUser?.words.filter(
     word => (selectedUser.wordScores[word.id] ?? -1) < 0
   ) || [];
-  
+
   // Count passed words: score >= 0
   const passedCount = selectedUser?.words.filter(
     word => (selectedUser.wordScores[word.id] ?? -1) >= 0
   ).length ?? 0;
-  
+
   const isAllWordsPassed = (selectedUser?.words?.length ?? 0) > 0 && availableWords.length === 0;
-  
+
   const selectedUserHistory = selectedUser?.quizHistory || [];
-  
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <header className="pt-8 pb-6 px-4 bg-black/40 border-b-4 border-primary">
@@ -271,8 +271,8 @@ const Index = () => {
             </p>
             <div className="flex items-center gap-3">
               <div className="flex-1 retro-progress">
-                <div 
-                  className="retro-progress-inner" 
+                <div
+                  className="retro-progress-inner"
                   style={{ width: `${(passedCount / (selectedUser.words?.length || 1)) * 100}%` }}
                 />
               </div>
@@ -283,12 +283,12 @@ const Index = () => {
           </div>
         )}
       </header>
-      
+
       <main className="flex-1 container max-w-4xl px-4 pb-12">
         {!quizState && !showHistory ? (
           <>
             <div className="mb-8">
-              <UserSelector 
+              <UserSelector
                 users={users}
                 selectedUserId={selectedUserId}
                 onSelectUser={handleSelectUser}
@@ -296,12 +296,12 @@ const Index = () => {
                 onDeleteUser={handleDeleteUser}
               />
             </div>
-            
+
             {selectedUserId && (
               <>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">Start Quiz</h2>
-                  
+
                   {selectedUserHistory.length > 0 && (
                     <button
                       onClick={handleToggleHistory}
@@ -311,10 +311,10 @@ const Index = () => {
                     </button>
                   )}
                 </div>
-                
+
                 {isAllWordsPassed ? (
-                  <QuizCompletion 
-                    userName={selectedUser?.name || ""} 
+                  <QuizCompletion
+                    userName={selectedUser?.name || ""}
                     onReset={handleResetProgress}
                     onBackToHome={() => {
                       setQuizState(null);
@@ -323,8 +323,8 @@ const Index = () => {
                   />
                 ) : (
                   <div className="grid gap-8 md:grid-cols-2">
-                    <FileUploader 
-                      onWordsLoaded={handleWordsLoaded} 
+                    <FileUploader
+                      onWordsLoaded={handleWordsLoaded}
                       selectedUser={selectedUser}
                     />
                     <QuizSettings words={availableWords} onStartQuiz={handleStartQuiz} />
@@ -337,7 +337,7 @@ const Index = () => {
           <div className="w-full">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-pixel text-primary">冒險紀錄</h2>
-              
+
               <button
                 onClick={handleToggleHistory}
                 className="retro-button text-xs"
@@ -345,7 +345,7 @@ const Index = () => {
                 返回 [EXIT]
               </button>
             </div>
-            
+
             <QuizHistory history={selectedUserHistory} />
           </div>
         ) : quizState?.isComplete ? (
@@ -358,7 +358,7 @@ const Index = () => {
           />
         )}
       </main>
-      
+
       <footer className="py-6 text-center text-sm text-muted-foreground">
         <p>© 2025 Wordplay Quiz Master - Improve your vocabulary</p>
       </footer>
