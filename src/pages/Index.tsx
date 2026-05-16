@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useBgMusic } from "@/hooks/useBgMusic";
 import FileUploader from "@/components/FileUploader";
 import QuizSettings from "@/components/QuizSettings";
 import QuizQuestion from "@/components/QuizQuestion";
@@ -20,6 +21,19 @@ const Index = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [quizState, setQuizState] = useState<QuizState | null>(null);
   const [showHistory, setShowHistory] = useState<boolean>(false);
+
+  // 背景音樂控制
+  const { play: playBgm, stop: stopBgm, muted: bgmMuted, toggleMute: toggleBgm } = useBgMusic("/bgm.mp3");
+
+  // 首頁時播放音樂，測試中 / 查看結果時停止；muted 改變時也重新判斷
+  useEffect(() => {
+    const isHomePage = !quizState && !showHistory;
+    if (isHomePage) {
+      playBgm();
+    } else {
+      stopBgm();
+    }
+  }, [quizState, showHistory, playBgm, stopBgm, bgmMuted]);
 
   // Initialize users from local storage
   useEffect(() => {
@@ -257,7 +271,16 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="pt-8 pb-6 px-4 bg-black/40 border-b-4 border-primary">
+      <header className="pt-8 pb-6 px-4 bg-black/40 border-b-4 border-primary relative">
+        {/* 音樂開關 */}
+        <button
+          onClick={toggleBgm}
+          title={bgmMuted ? "開啟音樂" : "關閉音樂"}
+          className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center border-2 border-primary bg-black/60 hover:bg-primary/20 transition-colors rounded text-lg"
+          style={{ lineHeight: 1 }}
+        >
+          {bgmMuted ? "🔇" : "🔊"}
+        </button>
         <h1 className="text-3xl font-pixel text-center text-primary drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
           WORDPLAY QUIZ MASTER
         </h1>
