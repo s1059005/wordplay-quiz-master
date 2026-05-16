@@ -29,45 +29,60 @@ export const shuffleArray = <T>(array: T[]): T[] => {
   return newArray;
 };
 
+// 語音 Promise 快取，避免重複請求同一單字且支援同時呼叫
+const audioPromiseCache: Record<string, Promise<HTMLAudioElement>> = {};
+
 export const speakWord = async (word: string): Promise<void> => {
   try {
-    // Get TTS configuration from environment variables
-    const baseUrl = import.meta.env.VITE_TTS_API_BASE_URL || "http://localhost:5000";
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
-    
-    try {
-      const response = await fetch(`${baseUrl}/api/v2/tts`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text: word,
-          language_code: "en-US",
-          voice_name: "en-US-Chirp3-HD-Sulafat",
-          speed: 1.0,
-          pitch: 0
-        }),
-        signal: controller.signal
-      });
+    if (!audioPromiseCache[word]) {
+      audioPromiseCache[word] = (async () => {
+        // Get TTS configuration from environment variables
+        const baseUrl = import.meta.env.VITE_TTS_API_BASE_URL || "http://localhost:5000";
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        
+        try {
+          const response = await fetch(`${baseUrl}/api/v2/tts`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              text: word,
+              language_code: "en-US",
+              voice_name: "en-US-Chirp3-HD-Sulafat",
+              speed: 1.0,
+              pitch: 0
+            }),
+            signal: controller.signal
+          });
 
-      if (!response.ok) {
-        throw new Error(`TTS API error: ${response.statusText}`);
-      }
+          if (!response.ok) {
+            throw new Error(`TTS API error: ${response.statusText}`);
+          }
 
-      const data = await response.json();
-      if (data.audioContent) {
-        const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
-        await audio.play();
-      } else {
-        throw new Error("No audio content in TTS response");
-      }
-    } finally {
-      clearTimeout(timeoutId);
+          const data = await response.json();
+          if (data.audioContent) {
+            const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
+            audio.load(); // 預載入
+            return audio;
+          } else {
+            throw new Error("No audio content in TTS response");
+          }
+        } finally {
+          clearTimeout(timeoutId);
+        }
+      })();
     }
+
+    const audio = await audioPromiseCache[word];
+    audio.currentTime = 0; // 重設時間以利重複播放
+    await audio.play();
   } catch (error) {
+    // 如果出錯，清除快取以便下次重試
+    delete audioPromiseCache[word];
+    
     console.error("TTS failed, falling back to browser speech synthesis:", error);
     
     // Fallback to browser's SpeechSynthesis

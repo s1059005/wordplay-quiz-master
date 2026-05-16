@@ -58,7 +58,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
     }
   };
 
-  const handleSubmit = (e?: React.FormEvent) => {
+  const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
     if (!currentWord) return;
@@ -71,10 +71,15 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
       return;
     }
 
-    if (inputValue.trim() === "") return;
+    // 允許空白答案（視為答錯）
     
     const correct = checkAnswer(inputValue, currentWord.english);
     setIsCorrect(correct);
+    
+    // 先播放語音（使用強效快取，響應應為毫秒級）
+    await speakWord(currentWord.english);
+    
+    // 再顯示結果
     setIsShowingResult(true);
     
     if (correct) {
@@ -174,7 +179,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
           <button 
             onClick={() => handleSubmit()} 
             className="w-full retro-button"
-            disabled={!isShowingResult && inputValue.trim() === ""}
+            disabled={false}
           >
             {isShowingResult && isCorrect === false ? "下一階段 [NEXT]" : "提交判定 [ENTER]"}
           </button>
