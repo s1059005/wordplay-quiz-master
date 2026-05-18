@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { parseCSV } from "@/utils/quizUtils";
 import { VocabWord, User } from "@/types";
 import { toast } from "sonner";
-import { Upload } from "lucide-react";
+import { Upload, HelpCircle } from "lucide-react";
 
 interface FileUploaderProps {
   onWordsLoaded: (words: VocabWord[], fileName: string) => void;
@@ -13,6 +20,7 @@ interface FileUploaderProps {
 
 const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser }) => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [showFormatHelp, setShowFormatHelp] = useState<boolean>(false);
 
   const handleFileChange = (file: File) => {
     const reader = new FileReader();
@@ -56,57 +64,121 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
   };
 
   return (
-    <Card className="retro-border">
-      <CardHeader>
-        <CardTitle className="text-xl text-center font-pixel text-primary drop-shadow-md">
-          卷軸上傳 [UPLOAD SCROLL]
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {selectedUser?.lastFileUpload && (
-          <div className="mb-4 p-3 bg-black/40 border-2 border-primary/20 relative">
-            <div className="absolute -top-3 left-4 bg-background px-2 font-pixel text-[8px] text-primary/60">ACTIVE SCROLL</div>
-            <p className="font-vt323 text-primary text-lg">檔案：{selectedUser.lastFileUpload.fileName}</p>
-            <p className="font-vt323 text-primary/60 text-sm">
-              儀式時間：{new Date(selectedUser.lastFileUpload.uploadDate).toLocaleString()}
-            </p>
-          </div>
-        )}
-        <div
-          className={`border-4 border-dashed p-8 text-center transition-all ${
-            isDragging ? "border-primary bg-primary/10 scale-105" : "border-primary/20 bg-black/20"
-          }`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <Upload className="mx-auto h-12 w-12 text-primary/40 mb-4" />
-          <p className="mb-2 font-vt323 text-xl text-primary">
-            投放 CSV 秘笈至此，或點擊開啟
-          </p>
-          <p className="font-pixel text-[8px] text-primary/40 mb-6">
-            格式: 中文, 英文 (每行一組)
-          </p>
-          <input
-            type="file"
-            id="fileInput"
-            className="hidden"
-            accept=".csv,.txt"
-            onChange={(e) => {
-              if (e.target.files?.length) {
-                handleFileChange(e.target.files[0]);
-              }
-            }}
-          />
-          <button
-            onClick={() => document.getElementById("fileInput")?.click()}
-            className="retro-button"
+    <>
+      <Card className="retro-border">
+        <CardHeader>
+          <CardTitle className="text-xl text-center font-pixel text-primary drop-shadow-md">
+            卷軸上傳 [UPLOAD SCROLL]
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {selectedUser?.lastFileUpload && (
+            <div className="mb-4 p-3 bg-black/40 border-2 border-primary/20 relative">
+              <div className="absolute -top-3 left-4 bg-background px-2 font-pixel text-[8px] text-primary/60">ACTIVE SCROLL</div>
+              <p className="font-vt323 text-primary text-lg">檔案：{selectedUser.lastFileUpload.fileName}</p>
+              <p className="font-vt323 text-primary/60 text-sm">
+                儀式時間：{new Date(selectedUser.lastFileUpload.uploadDate).toLocaleString()}
+              </p>
+            </div>
+          )}
+          <div
+            className={`border-4 border-dashed p-8 text-center transition-all ${
+              isDragging ? "border-primary bg-primary/10 scale-105" : "border-primary/20 bg-black/20"
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
           >
-            開啟卷軸 [OPEN]
-          </button>
-        </div>
-      </CardContent>
-    </Card>
+            <Upload className="mx-auto h-12 w-12 text-primary/40 mb-4" />
+            <p className="mb-2 font-vt323 text-xl text-primary">
+              投放 CSV 秘笈至此，或點擊開啟
+            </p>
+            <p className="font-pixel text-[8px] text-primary/40 mb-2">
+              格式: 中文, 英文 (每行一組)
+            </p>
+            {/* 格式說明按鈕 */}
+            <button
+              type="button"
+              onClick={() => setShowFormatHelp(true)}
+              className="inline-flex items-center gap-1 font-vt323 text-sm text-primary/70 hover:text-primary underline underline-offset-4 decoration-primary/30 hover:decoration-primary transition-colors mb-6 cursor-pointer"
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+              📜 格式說明 [FORMAT HELP]
+            </button>
+            <br />
+            <input
+              type="file"
+              id="fileInput"
+              className="hidden"
+              accept=".csv,.txt"
+              onChange={(e) => {
+                if (e.target.files?.length) {
+                  handleFileChange(e.target.files[0]);
+                }
+              }}
+            />
+            <button
+              onClick={() => document.getElementById("fileInput")?.click()}
+              className="retro-button"
+            >
+              開啟卷軸 [OPEN]
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 格式說明 Dialog */}
+      <Dialog open={showFormatHelp} onOpenChange={setShowFormatHelp}>
+        <DialogContent className="border-2 border-primary bg-background max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-pixel text-primary text-lg text-center">
+              📜 卷軸格式說明 [SCROLL FORMAT]
+            </DialogTitle>
+            <DialogDescription className="font-vt323 text-primary/60 text-center">
+              請依照以下格式製作文字檔（.csv 或 .txt）
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-2">
+            {/* 格式規則 */}
+            <div className="p-3 bg-black/40 border border-primary/30 rounded">
+              <p className="font-pixel text-[10px] text-primary/80 mb-2">▸ 基本規則</p>
+              <ul className="font-vt323 text-sm text-primary/90 space-y-1 list-disc list-inside">
+                <li>每行一組單字</li>
+                <li>中文與英文之間用<span className="text-yellow-400 font-bold">半形逗號 ,</span> 分隔</li>
+                <li>檔案須為 <span className="text-yellow-400">.csv</span> 或 <span className="text-yellow-400">.txt</span> 格式</li>
+                <li>編碼建議使用 <span className="text-yellow-400">UTF-8</span></li>
+              </ul>
+            </div>
+
+            {/* 範例檔案內容 */}
+            <div className="p-3 bg-black/60 border border-primary/30 rounded">
+              <p className="font-pixel text-[10px] text-primary/80 mb-2">▸ 範例內容（words.csv）</p>
+              <pre className="font-vt323 text-sm text-green-400 leading-relaxed whitespace-pre-wrap">
+{`蘋果, apple
+香蕉, banana
+貓咪, cat
+狗, dog
+書本, book
+電腦, computer
+老師, teacher
+學生, student`}
+              </pre>
+            </div>
+
+            {/* 注意事項 */}
+            <div className="p-3 bg-black/40 border border-yellow-500/30 rounded">
+              <p className="font-pixel text-[10px] text-yellow-400/80 mb-2">⚠ 注意事項</p>
+              <ul className="font-vt323 text-sm text-primary/70 space-y-1 list-disc list-inside">
+                <li>空白行會被自動忽略</li>
+                <li>缺少中文或英文的行會被跳過</li>
+                <li>前後空白會自動移除</li>
+              </ul>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

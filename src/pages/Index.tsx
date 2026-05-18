@@ -281,7 +281,11 @@ const Index = () => {
         >
           {bgmMuted ? "🔇" : "🔊"}
         </button>
-        <h1 className="text-3xl font-pixel text-center text-primary drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+        <h1
+          onClick={() => { setQuizState(null); setShowHistory(false); }}
+          className="text-3xl font-pixel text-center text-primary drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] cursor-pointer hover:text-primary/80 hover:scale-105 transition-all"
+          title="返回首頁"
+        >
           WORDPLAY QUIZ MASTER
         </h1>
         <p className="text-center text-primary/80 mt-2 font-vt323 text-xl">
