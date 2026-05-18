@@ -6,21 +6,25 @@ import { Progress } from "@/components/ui/progress";
 import { VocabWord, QuizState } from "@/types";
 import { speakWord, checkAnswer } from "@/utils/quizUtils";
 import { Volume2 } from "lucide-react";
+import WordSpiritAvatar from "@/components/WordSpiritAvatar";
 
 interface QuizQuestionProps {
   quizState: QuizState;
+  wordScores: Record<string, number>;
   onAnswer: (answer: string, isCorrect: boolean) => void;
   onComplete: () => void;
 }
 
 const QuizQuestion: React.FC<QuizQuestionProps> = ({
   quizState,
+  wordScores,
   onAnswer,
   onComplete,
 }) => {
   const [inputValue, setInputValue] = useState<string>("");
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [isShowingResult, setIsShowingResult] = useState<boolean>(false);
+  const [spiritAnim, setSpiritAnim] = useState<'appear' | 'idle' | 'captured' | 'escaped'>('appear');
   const inputRef = useRef<HTMLInputElement>(null);
   
   const currentWord = quizState.words[quizState.currentWordIndex];
@@ -36,6 +40,11 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
     setInputValue("");
     setIsCorrect(null);
     setIsShowingResult(false);
+    setSpiritAnim('appear');
+
+    // 出現動畫結束後切換到 idle
+    const timer = setTimeout(() => setSpiritAnim('idle'), 600);
+    return () => clearTimeout(timer);
   }, [currentWord, quizState.currentWordIndex]);
 
   // Focus input whenever it's not showing result (re-enabled)
@@ -78,6 +87,9 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
     
     // 先播放語音（使用強效快取，響應應為毫秒級）
     await speakWord(currentWord.english);
+    
+    // 觸發詞靈動畫
+    setSpiritAnim(correct ? 'captured' : 'escaped');
     
     // 再顯示結果
     setIsShowingResult(true);
@@ -131,7 +143,16 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
         </CardHeader>
         
         <CardContent className="pt-6">
-          <div className="space-y-8">
+          <div className="space-y-6">
+            {/* 詞靈動物 */}
+            <div className="flex justify-center py-4">
+              <WordSpiritAvatar
+                wordId={currentWord.id}
+                wordScore={wordScores[currentWord.id] ?? -1}
+                animState={spiritAnim}
+              />
+            </div>
+
             <div className="text-center py-4 bg-black/40 border-2 border-primary/20 relative">
               <div className="absolute -top-3 left-4 bg-background px-2 font-pixel text-[8px] text-primary/60">TARGET</div>
               <h2 className="text-4xl font-vt323 text-primary tracking-widest">{currentWord.chinese}</h2>

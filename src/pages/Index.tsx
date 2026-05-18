@@ -376,6 +376,7 @@ const Index = () => {
         ) : (
           <QuizQuestion
             quizState={quizState!}
+            wordScores={selectedUser?.wordScores ?? {}}
             onAnswer={handleAnswer}
             onComplete={handleCompleteQuiz}
           />
