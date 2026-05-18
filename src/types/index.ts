@@ -26,6 +26,7 @@ export interface User {
   quizHistory: QuizResult[];
   passedWordIds?: string[];     // 向後相容用（舊資料遷移）
   wordScores: Record<string, number>;  // 單字分數，≥ 0 表示通過
+  completionMessage?: string; // 通關祝賀詞
 }
 
 export interface QuizState {

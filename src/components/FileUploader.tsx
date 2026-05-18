@@ -16,11 +16,14 @@ import { Upload, HelpCircle } from "lucide-react";
 interface FileUploaderProps {
   onWordsLoaded: (words: VocabWord[], fileName: string) => void;
   selectedUser?: User | null;
+  onUpdateCompletionMessage?: (message: string) => void;
 }
 
-const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser }) => {
+const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser, onUpdateCompletionMessage }) => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [showFormatHelp, setShowFormatHelp] = useState<boolean>(false);
+  const [showCompletionMessageDialog, setShowCompletionMessageDialog] = useState<boolean>(false);
+  const [completionMessageInput, setCompletionMessageInput] = useState<string>("");
 
   const handleFileChange = (file: File) => {
     const reader = new FileReader();
@@ -36,6 +39,12 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
         
         onWordsLoaded(words, file.name);
         toast.success(`已從 ${file.name} 載入 ${words.length} 個單字`);
+        
+        // Show completion message dialog after successful upload
+        if (onUpdateCompletionMessage) {
+          setCompletionMessageInput(selectedUser?.completionMessage || "");
+          setShowCompletionMessageDialog(true);
+        }
       } catch (error) {
         console.error("Error parsing CSV file:", error);
         toast.error("解析檔案時發生錯誤。請檢查格式後重試。");
@@ -61,6 +70,14 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
     if (e.dataTransfer.files?.length) {
       handleFileChange(e.dataTransfer.files[0]);
     }
+  };
+
+  const handleSaveCompletionMessage = () => {
+    if (onUpdateCompletionMessage) {
+      onUpdateCompletionMessage(completionMessageInput);
+      toast.success("已儲存通關祝賀詞！");
+    }
+    setShowCompletionMessageDialog(false);
   };
 
   return (
@@ -174,6 +191,51 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
                 <li>缺少中文或英文的行會被跳過</li>
                 <li>前後空白會自動移除</li>
               </ul>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* 通關祝賀詞設定 Dialog (隱藏式，僅在上傳後彈出) */}
+      <Dialog open={showCompletionMessageDialog} onOpenChange={setShowCompletionMessageDialog}>
+        <DialogContent className="border-2 border-primary bg-background max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-pixel text-primary text-lg text-center">
+              🎉 設定通關祝賀詞
+            </DialogTitle>
+            <DialogDescription className="font-vt323 text-primary/60 text-center">
+              請輸入當受試者完成所有題目時，您想對他們說的話。
+              <br />
+              (此訊息將被隱藏，直到受試者通關才會顯示)
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <label htmlFor="completionMessage" className="font-vt323 text-primary text-sm">
+                祝賀詞內容 [MESSAGE]
+              </label>
+              <textarea
+                id="completionMessage"
+                value={completionMessageInput}
+                onChange={(e) => setCompletionMessageInput(e.target.value)}
+                placeholder="例如：恭喜你! 通過, 得到一個禮物"
+                className="w-full bg-black/40 border-2 border-primary/40 rounded p-3 text-primary font-vt323 h-24 focus:border-primary focus:outline-none transition-colors"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                onClick={() => setShowCompletionMessageDialog(false)}
+                className="retro-button bg-transparent border-primary/40 text-primary/70 hover:text-primary hover:border-primary text-sm py-2"
+              >
+                略過 [SKIP]
+              </button>
+              <button
+                onClick={handleSaveCompletionMessage}
+                className="retro-button text-sm py-2"
+              >
+                儲存並隱藏 [SAVE]
+              </button>
             </div>
           </div>
         </DialogContent>

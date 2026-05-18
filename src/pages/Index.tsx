@@ -132,6 +132,24 @@ const Index = () => {
     setShowHistory(false);
   };
 
+  const handleUpdateCompletionMessage = (message: string) => {
+    if (!selectedUserId) return;
+    setUsers(prev => {
+      const updatedUsers = prev.map(user => {
+        if (user.id === selectedUserId) {
+          return {
+            ...user,
+            completionMessage: message
+          };
+        }
+        return user;
+      });
+      // 立即寫入 localStorage 確保資料不遺失
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updatedUsers));
+      return updatedUsers;
+    });
+  };
+
   const handleStartQuiz = (settings: QuizSettingsType, selectedWords: VocabWord[]) => {
     setQuizState({
       words: selectedWords,
@@ -314,34 +332,24 @@ const Index = () => {
       <main className="flex-1 container max-w-4xl px-4 pb-12">
         {!quizState && !showHistory ? (
           <>
-            <div className="mb-8">
-              <UserSelector
-                users={users}
-                selectedUserId={selectedUserId}
-                onSelectUser={handleSelectUser}
-                onAddUser={handleAddUser}
-                onDeleteUser={handleDeleteUser}
-              />
-            </div>
+            {(!selectedUserId || !isAllWordsPassed) && (
+              <div className="mb-8">
+                <UserSelector
+                  users={users}
+                  selectedUserId={selectedUserId}
+                  onSelectUser={handleSelectUser}
+                  onAddUser={handleAddUser}
+                  onDeleteUser={handleDeleteUser}
+                />
+              </div>
+            )}
 
             {selectedUserId && (
               <>
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">Start Quiz</h2>
-
-                  {selectedUserHistory.length > 0 && (
-                    <button
-                      onClick={handleToggleHistory}
-                      className="text-primary hover:text-white font-pixel text-xs flex items-center bg-black/50 px-3 py-1 border-2 border-primary"
-                    >
-                      查看歷史紀錄 [H]
-                    </button>
-                  )}
-                </div>
-
                 {isAllWordsPassed ? (
                   <QuizCompletion
                     userName={selectedUser?.name || ""}
+                    completionMessage={selectedUser?.completionMessage}
                     onReset={handleResetProgress}
                     onBackToHome={() => {
                       setQuizState(null);
@@ -349,13 +357,29 @@ const Index = () => {
                     }}
                   />
                 ) : (
-                  <div className="grid gap-8 md:grid-cols-2">
-                    <FileUploader
-                      onWordsLoaded={handleWordsLoaded}
-                      selectedUser={selectedUser}
-                    />
-                    <QuizSettings words={availableWords} onStartQuiz={handleStartQuiz} />
-                  </div>
+                  <>
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-xl font-semibold">Start Quiz</h2>
+
+                      {selectedUserHistory.length > 0 && (
+                        <button
+                          onClick={handleToggleHistory}
+                          className="text-primary hover:text-white font-pixel text-xs flex items-center bg-black/50 px-3 py-1 border-2 border-primary"
+                        >
+                          查看歷史紀錄 [H]
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid gap-8 md:grid-cols-2">
+                      <FileUploader
+                        onWordsLoaded={handleWordsLoaded}
+                        selectedUser={selectedUser}
+                        onUpdateCompletionMessage={handleUpdateCompletionMessage}
+                      />
+                      <QuizSettings words={availableWords} onStartQuiz={handleStartQuiz} />
+                    </div>
+                  </>
                 )}
               </>
             )}
