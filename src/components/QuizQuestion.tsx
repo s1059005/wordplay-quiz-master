@@ -12,19 +12,18 @@ interface QuizQuestionProps {
   quizState: QuizState;
   wordScores: Record<string, number>;
   onAnswer: (answer: string, isCorrect: boolean) => void;
-  onComplete: () => void;
 }
 
 const QuizQuestion: React.FC<QuizQuestionProps> = ({
   quizState,
   wordScores,
   onAnswer,
-  onComplete,
 }) => {
   const [inputValue, setInputValue] = useState<string>("");
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [isShowingResult, setIsShowingResult] = useState<boolean>(false);
   const [spiritAnim, setSpiritAnim] = useState<'appear' | 'idle' | 'captured' | 'escaped'>('appear');
+  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const currentWord = quizState.words[quizState.currentWordIndex];
@@ -41,6 +40,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
     setIsCorrect(null);
     setIsShowingResult(false);
     setSpiritAnim('appear');
+    setIsTransitioning(false);
 
     // 出現動畫結束後切換到 idle
     const timer = setTimeout(() => setSpiritAnim('idle'), 600);
@@ -60,21 +60,17 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
   
   const proceedToNext = (correct: boolean) => {
     onAnswer(inputValue.trim(), correct);
-    
-    // Move to next word or complete quiz after answering
-    if (quizState.currentWordIndex >= quizState.questionCount - 1) {
-      onComplete();
-    }
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
-    if (!currentWord) return;
+    if (!currentWord || isTransitioning) return;
 
     // 如果正在顯示結果，且是錯誤的，再次點擊/按下 Enter 則進入下一題
     if (isShowingResult) {
       if (isCorrect === false) {
+        setIsTransitioning(true);
         proceedToNext(false);
       }
       return;
@@ -95,6 +91,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
     setIsShowingResult(true);
     
     if (correct) {
+      setIsTransitioning(true);
       // 答對則 1 秒後自動跳轉
       setTimeout(() => {
         proceedToNext(true);
@@ -102,12 +99,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
     }
     // 答錯則保持原樣，等待使用者確認
   };
-  
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSubmit();
-    }
-  };
+
   
   const playAudio = () => {
     if (currentWord) {
@@ -165,7 +157,6 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
                 placeholder="輸入英文單字..."
                 className={`w-full retro-input text-center text-4xl py-4 ${
                   isCorrect === true
@@ -200,9 +191,15 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
           <button 
             onClick={() => handleSubmit()} 
             className="w-full retro-button"
-            disabled={false}
+            disabled={isTransitioning}
           >
-            {isShowingResult && isCorrect === false ? "下一階段 [NEXT]" : "提交判定 [ENTER]"}
+            {isTransitioning 
+              ? "傳送中..." 
+              : isShowingResult && isCorrect === false 
+              ? "下一階段 [NEXT]" 
+              : isShowingResult && isCorrect === true
+              ? "成功收服！ [SUCCESS]"
+              : "提交判定 [ENTER]"}
           </button>
         </CardFooter>
       </Card>

@@ -179,11 +179,14 @@ const Index = () => {
         }
       ];
 
-      // Move to the next word
+      const isLastQuestion = prev.currentWordIndex >= prev.questionCount - 1;
+
+      // Move to the next word or mark complete
       const updatedState = {
         ...prev,
-        currentWordIndex: prev.currentWordIndex + 1,
-        answers: updatedAnswers
+        currentWordIndex: isLastQuestion ? prev.currentWordIndex : prev.currentWordIndex + 1,
+        answers: updatedAnswers,
+        isComplete: isLastQuestion ? true : prev.isComplete
       };
 
       // Update word score: correct +1, incorrect -1
@@ -191,7 +194,7 @@ const Index = () => {
         setUsers(prevUsers => prevUsers.map(user => {
           if (user.id === selectedUserId) {
             const currentScore = user.wordScores[currentWord.id] ?? -1;
-            // 答錯時扣分(增加需答對次數)，限制最多只扣到 -3 (即原先的 1 次加上最多增加的 2 次)
+            // 答錯時扣分(增加需答對次數)，限制最多只扣到 -3 (即原先的 1 次加上最多增加 of 2 次)
             const newScore = isCorrect ? currentScore + 1 : Math.max(-3, currentScore - 1);
             return {
               ...user,
@@ -207,10 +210,6 @@ const Index = () => {
 
       return updatedState;
     });
-  };
-
-  const handleCompleteQuiz = () => {
-    setQuizState(prev => prev ? { ...prev, isComplete: true } : null);
   };
 
   const handleRestartQuiz = () => {
@@ -406,7 +405,6 @@ const Index = () => {
             quizState={quizState!}
             wordScores={selectedUser?.wordScores ?? {}}
             onAnswer={handleAnswer}
-            onComplete={handleCompleteQuiz}
           />
         )}
       </main>
