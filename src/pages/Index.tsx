@@ -12,6 +12,8 @@ import { VocabWord, QuizState, QuizSettings as QuizSettingsType, User, QuizResul
 import { calculateScore } from "@/utils/quizUtils";
 import { v4 as uuidv4 } from "uuid";
 import { Progress } from "@/components/ui/progress";
+import StoryPlayer from "@/components/StoryPlayer";
+
 
 // Local storage key for users
 const USERS_STORAGE_KEY = "wordplay-quiz-users";
@@ -21,9 +23,20 @@ const Index = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [quizState, setQuizState] = useState<QuizState | null>(null);
   const [showHistory, setShowHistory] = useState<boolean>(false);
+  const [showStoryPlayer, setShowStoryPlayer] = useState<boolean>(false);
+
 
   // 背景音樂控制
-  const { play: playBgm, stop: stopBgm, muted: bgmMuted, toggleMute: toggleBgm } = useBgMusic("/bgm.mp3");
+  const { play: playBgm, stop: stopBgm, muted: bgmMuted, toggleMute: toggleBgm, setVolume: setBgmVolume } = useBgMusic("/bgm.mp3");
+
+  const handleStoryPlayStateChange = (isStoryPlaying: boolean) => {
+    if (isStoryPlaying) {
+      setBgmVolume(0.05); // 故事播放時降低背景音樂音量
+    } else {
+      setBgmVolume(0.35); // 暫停或結束時恢復背景音樂音量
+    }
+  };
+
 
   // 首頁時播放音樂，測試中 / 查看結果時停止；muted 改變時也重新判斷
   useEffect(() => {
@@ -107,7 +120,9 @@ const Index = () => {
     setSelectedUserId(userId);
     setQuizState(null);
     setShowHistory(false);
+    setShowStoryPlayer(false); // 切換使用者時關閉播放器
   };
+
 
   const handleWordsLoaded = (loadedWords: VocabWord[], fileName: string) => {
     if (!selectedUserId) return;
@@ -253,7 +268,9 @@ const Index = () => {
     if (quizState) {
       setQuizState(null);
     }
+    setShowStoryPlayer(false); // 查看歷史紀錄時關閉播放器
   };
+
 
   const handleResetProgress = () => {
     if (!selectedUserId) return;
@@ -357,17 +374,30 @@ const Index = () => {
                   />
                 ) : (
                   <>
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="flex justify-between items-center mb-4 gap-3 flex-wrap">
                       <h2 className="text-xl font-semibold">Start Quiz</h2>
 
-                      {selectedUserHistory.length > 0 && (
+                      <div className="flex items-center gap-3">
                         <button
-                          onClick={handleToggleHistory}
-                          className="text-primary hover:text-white font-pixel text-xs flex items-center bg-black/50 px-3 py-1 border-2 border-primary"
+                          onClick={() => setShowStoryPlayer(prev => !prev)}
+                          className={`font-pixel text-xs flex items-center px-3 py-1 border-2 transition-all ${
+                            showStoryPlayer
+                              ? "bg-primary text-black border-primary scale-105"
+                              : "bg-black/50 text-primary border-primary hover:bg-primary/20"
+                          }`}
                         >
-                          查看歷史紀錄 [H]
+                          📜 詞靈降魔前導傳說
                         </button>
-                      )}
+
+                        {selectedUserHistory.length > 0 && (
+                          <button
+                            onClick={handleToggleHistory}
+                            className="text-primary hover:text-white font-pixel text-xs flex items-center bg-black/50 px-3 py-1 border-2 border-primary"
+                          >
+                            查看歷史紀錄 [H]
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="grid gap-8 md:grid-cols-2">
@@ -378,6 +408,8 @@ const Index = () => {
                       />
                       <QuizSettings words={availableWords} onStartQuiz={handleStartQuiz} />
                     </div>
+
+
                   </>
                 )}
               </>
@@ -412,8 +444,17 @@ const Index = () => {
       <footer className="py-6 text-center text-sm text-muted-foreground">
         <p>© 2025 Wordplay Quiz Master - Improve your vocabulary</p>
       </footer>
+
+      {/* 點擊觸發的懸浮故事播放器 */}
+      {showStoryPlayer && !quizState && !showHistory && selectedUserId && (
+        <StoryPlayer
+          onClose={() => setShowStoryPlayer(false)}
+          onAudioPlayStateChange={handleStoryPlayStateChange}
+        />
+      )}
     </div>
   );
 };
 
 export default Index;
+

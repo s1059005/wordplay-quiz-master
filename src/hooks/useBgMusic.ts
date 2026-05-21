@@ -71,5 +71,13 @@ export function useBgMusic(src: string) {
     });
   }, []);
 
-  return { play, stop, muted, toggleMute };
+  const setVolume = useCallback((newVolume: number) => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.volume = newVolume;
+    }
+  }, []);
+
+  return { play, stop, muted, toggleMute, setVolume };
 }
+
