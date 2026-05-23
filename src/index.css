@@ -195,3 +195,111 @@
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
 }
+
+/* ─── Tab 切換 ────────────────────────────────────── */
+
+.retro-tab {
+  @apply px-6 py-2 font-pixel text-xs border-2 border-primary/40 transition-all duration-150 relative;
+  background: rgba(0, 0, 0, 0.4);
+  color: hsl(var(--primary) / 0.6);
+}
+
+.retro-tab:hover {
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary) / 0.7);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.retro-tab-active {
+  @apply border-primary;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  box-shadow: 0 0 12px rgba(240, 165, 0, 0.4);
+}
+
+.retro-tab-active:hover {
+  color: hsl(var(--primary-foreground));
+  border-color: hsl(var(--primary));
+}
+
+/* ─── 詞靈圖鑑 ────────────────────────────────────── */
+
+.codex-card {
+  @apply border-2 border-primary/30 p-3 transition-all duration-200 cursor-pointer relative overflow-hidden;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.codex-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 60%, rgba(240, 165, 0, 0.05) 100%);
+  pointer-events: none;
+}
+
+/* 未收伏 */
+.codex-card-locked {
+  @apply border-primary/10;
+  cursor: default;
+}
+
+.codex-card-locked .codex-spirit {
+  filter: grayscale(1) brightness(0.3);
+  opacity: 0.5;
+}
+
+.codex-card-locked:hover {
+  @apply border-primary/20;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* 已收伏 */
+.codex-card-unlocked:hover {
+  @apply border-primary;
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 16px rgba(240, 165, 0, 0.2), inset 0 0 20px rgba(240, 165, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.codex-card-unlocked:active {
+  transform: translateY(0);
+}
+
+/* 圖鑑揭露動畫 */
+@keyframes codexReveal {
+  0%   { filter: grayscale(1) brightness(0.3); opacity: 0.5; }
+  50%  { filter: grayscale(0) brightness(1.5); opacity: 1; }
+  100% { filter: grayscale(0) brightness(1); opacity: 1; }
+}
+
+.codex-reveal {
+  animation: codexReveal 0.6s ease-out forwards;
+}
+
+/* 圖鑑徽章脈動 */
+@keyframes codexBadgePulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(240, 165, 0, 0.3); }
+  50%      { box-shadow: 0 0 10px rgba(240, 165, 0, 0.6); }
+}
+
+.codex-badge-pulse {
+  animation: codexBadgePulse 2s ease-in-out infinite;
+}
+
+/* 圖鑑篩選器按鈕 */
+.codex-filter-btn {
+  @apply px-3 py-1 font-pixel text-[10px] border border-primary/30 transition-all;
+  background: rgba(0, 0, 0, 0.3);
+  color: hsl(var(--primary) / 0.6);
+}
+
+.codex-filter-btn:hover {
+  @apply border-primary/60;
+  color: hsl(var(--primary));
+}
+
+.codex-filter-btn-active {
+  @apply border-primary;
+  background: hsl(var(--primary) / 0.15);
+  color: hsl(var(--primary));
+}

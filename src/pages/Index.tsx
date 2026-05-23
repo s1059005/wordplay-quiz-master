@@ -13,6 +13,7 @@ import { calculateScore } from "@/utils/quizUtils";
 import { v4 as uuidv4 } from "uuid";
 import { Progress } from "@/components/ui/progress";
 import StoryPlayer from "@/components/StoryPlayer";
+import SpiritCodex from "@/components/SpiritCodex";
 
 
 // Local storage key for users
@@ -24,6 +25,7 @@ const Index = () => {
   const [quizState, setQuizState] = useState<QuizState | null>(null);
   const [showHistory, setShowHistory] = useState<boolean>(false);
   const [showStoryPlayer, setShowStoryPlayer] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<'home' | 'codex'>('home');
 
 
   // 背景音樂控制
@@ -40,13 +42,13 @@ const Index = () => {
 
   // 首頁時播放音樂，測試中 / 查看結果時停止；muted 改變時也重新判斷
   useEffect(() => {
-    const isHomePage = !quizState && !showHistory;
+    const isHomePage = !quizState && !showHistory && activeTab === 'home';
     if (isHomePage) {
       playBgm();
     } else {
       stopBgm();
     }
-  }, [quizState, showHistory, playBgm, stopBgm, bgmMuted]);
+  }, [quizState, showHistory, activeTab, playBgm, stopBgm, bgmMuted]);
 
   // Initialize users from local storage
   useEffect(() => {
@@ -121,6 +123,7 @@ const Index = () => {
     setQuizState(null);
     setShowHistory(false);
     setShowStoryPlayer(false); // 切換使用者時關閉播放器
+    setActiveTab('home');      // 切換使用者時回到首頁
   };
 
 
@@ -345,8 +348,37 @@ const Index = () => {
         )}
       </header>
 
+      {/* Tab 切換列 */}
+      {selectedUser && !quizState && !showHistory && (
+        <div className="flex justify-center gap-0 border-b-2 border-primary/20 bg-black/30">
+          <button
+            className={`retro-tab ${activeTab === 'home' ? 'retro-tab-active' : ''}`}
+            onClick={() => setActiveTab('home')}
+          >
+            ⚔️ 首頁
+          </button>
+          <button
+            className={`retro-tab ${activeTab === 'codex' ? 'retro-tab-active' : ''}`}
+            onClick={() => setActiveTab('codex')}
+          >
+            📖 詞靈圖鑑
+            {selectedUser.words.length > 0 && (
+              <span className="ml-2 inline-block px-1.5 py-0 text-[7px] border border-current codex-badge-pulse">
+                {selectedUser.words.filter(w => (selectedUser.wordScores[w.id] ?? -1) >= 0).length}/{selectedUser.words.length}
+              </span>
+            )}
+          </button>
+        </div>
+      )}
+
       <main className="flex-1 container max-w-4xl px-4 pb-12">
-        {!quizState && !showHistory ? (
+        {/* 圖鑑分頁 */}
+        {activeTab === 'codex' && selectedUser && !quizState && !showHistory ? (
+          <SpiritCodex
+            words={selectedUser.words}
+            wordScores={selectedUser.wordScores}
+          />
+        ) : !quizState && !showHistory ? (
           <>
             {(!selectedUserId || !isAllWordsPassed) && (
               <div className="mb-8">
