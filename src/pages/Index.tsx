@@ -26,6 +26,7 @@ const Index = () => {
   const [showHistory, setShowHistory] = useState<boolean>(false);
   const [showStoryPlayer, setShowStoryPlayer] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'home' | 'codex'>('home');
+  const [dismissedCompletion, setDismissedCompletion] = useState<boolean>(false);
 
 
   // 背景音樂控制
@@ -106,6 +107,7 @@ const Index = () => {
     setSelectedUserId(newUser.id);
     setQuizState(null);
     setShowHistory(false);
+    setDismissedCompletion(false);
   };
 
   const handleDeleteUser = (userId: string) => {
@@ -115,6 +117,7 @@ const Index = () => {
       setSelectedUserId(null);
       setQuizState(null);
       setShowHistory(false);
+      setDismissedCompletion(false);
     }
   };
 
@@ -124,6 +127,7 @@ const Index = () => {
     setShowHistory(false);
     setShowStoryPlayer(false); // 切換使用者時關閉播放器
     setActiveTab('home');      // 切換使用者時回到首頁
+    setDismissedCompletion(false);
   };
 
 
@@ -148,6 +152,7 @@ const Index = () => {
     // Reset quiz state when new words are loaded
     setQuizState(null);
     setShowHistory(false);
+    setDismissedCompletion(false);
   };
 
   const handleUpdateCompletionMessage = (message: string) => {
@@ -287,6 +292,7 @@ const Index = () => {
       }
       return user;
     }));
+    setDismissedCompletion(false);
   };
 
   // Get the selected user's words
@@ -319,7 +325,12 @@ const Index = () => {
           {bgmMuted ? "🔇" : "🔊"}
         </button>
         <h1
-          onClick={() => { setQuizState(null); setShowHistory(false); }}
+          onClick={() => { 
+            setQuizState(null); 
+            setShowHistory(false); 
+            setActiveTab('home');
+            setShowStoryPlayer(false);
+          }}
           className="text-3xl font-pixel text-center text-primary drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] cursor-pointer hover:text-primary/80 hover:scale-105 transition-all"
           title="返回首頁"
         >
@@ -380,7 +391,7 @@ const Index = () => {
           />
         ) : !quizState && !showHistory ? (
           <>
-            {(!selectedUserId || !isAllWordsPassed) && (
+            {(!selectedUserId || !isAllWordsPassed || dismissedCompletion) && (
               <div className="mb-8">
                 <UserSelector
                   users={users}
@@ -394,14 +405,13 @@ const Index = () => {
 
             {selectedUserId && (
               <>
-                {isAllWordsPassed ? (
+                {isAllWordsPassed && !dismissedCompletion ? (
                   <QuizCompletion
                     userName={selectedUser?.name || ""}
                     completionMessage={selectedUser?.completionMessage}
                     onReset={handleResetProgress}
                     onBackToHome={() => {
-                      setQuizState(null);
-                      setShowHistory(false);
+                      setDismissedCompletion(true);
                     }}
                   />
                 ) : (
@@ -438,7 +448,12 @@ const Index = () => {
                         selectedUser={selectedUser}
                         onUpdateCompletionMessage={handleUpdateCompletionMessage}
                       />
-                      <QuizSettings words={availableWords} onStartQuiz={handleStartQuiz} />
+                      <QuizSettings 
+                        words={availableWords} 
+                        onStartQuiz={handleStartQuiz} 
+                        isAllWordsPassed={isAllWordsPassed}
+                        onReset={handleResetProgress}
+                      />
                     </div>
 
 
