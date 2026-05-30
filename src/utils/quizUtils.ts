@@ -177,5 +177,5 @@ export const checkAnswer = (
   userAnswer: string, 
   correctAnswer: string
 ): boolean => {
-  return userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
+  return userAnswer.trim() === correctAnswer.trim();
 };
