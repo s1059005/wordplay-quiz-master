@@ -134,20 +134,27 @@ const Index = () => {
   const handleWordsLoaded = (loadedWords: VocabWord[], fileName: string) => {
     if (!selectedUserId) return;
 
-    // Update the selected user's words and file information
-    setUsers(prev => prev.map(user => {
-      if (user.id === selectedUserId) {
-        return {
-          ...user,
-          words: loadedWords,
-          lastFileUpload: {
-            fileName,
-            uploadDate: new Date().toISOString()
-          }
-        };
-      }
-      return user;
-    }));
+    // Update the selected user's words and file information,
+    // and clear wordScores so old quiz progress is removed from localStorage
+    setUsers(prev => {
+      const updatedUsers = prev.map(user => {
+        if (user.id === selectedUserId) {
+          return {
+            ...user,
+            words: loadedWords,
+            wordScores: {}, // 清除舊題庫的學習進度
+            lastFileUpload: {
+              fileName,
+              uploadDate: new Date().toISOString()
+            }
+          };
+        }
+        return user;
+      });
+      // 立即寫入 localStorage，確保舊進度資料完全清除
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updatedUsers));
+      return updatedUsers;
+    });
 
     // Reset quiz state when new words are loaded
     setQuizState(null);
