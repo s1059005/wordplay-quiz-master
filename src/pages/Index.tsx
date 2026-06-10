@@ -22,6 +22,7 @@ const USERS_STORAGE_KEY = "wordplay-quiz-users";
 const Index = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [quizState, setQuizState] = useState<QuizState | null>(null);
   const [showHistory, setShowHistory] = useState<boolean>(false);
   const [showStoryPlayer, setShowStoryPlayer] = useState<boolean>(false);
@@ -87,14 +88,15 @@ const Index = () => {
         console.error("Error parsing stored users:", error);
       }
     }
+    setIsInitialized(true);
   }, []);
 
   // Save users to local storage whenever they change
   useEffect(() => {
-    if (users.length > 0) {
+    if (isInitialized) {
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
     }
-  }, [users]);
+  }, [users, isInitialized]);
 
   const handleAddUser = (name: string) => {
     const newUser: User = {

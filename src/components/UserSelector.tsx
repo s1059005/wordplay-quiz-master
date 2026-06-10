@@ -23,6 +23,7 @@ const UserSelector: React.FC<UserSelectorProps> = ({
 }) => {
   const [newUserName, setNewUserName] = useState<string>("");
   const [isAddingUser, setIsAddingUser] = useState<boolean>(false);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
   const handleAddUser = () => {
     if (!newUserName.trim()) {
@@ -62,15 +63,36 @@ const UserSelector: React.FC<UserSelectorProps> = ({
                       LV. {user.words.length} 單字儲備
                     </span>
                   </div>
-                  <button
-                    className="p-2 text-primary hover:text-red-500 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteUser(user.id);
-                    }}
-                  >
-                    <Trash className="h-5 w-5" />
-                  </button>
+                  {deletingUserId === user.id ? (
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <span className="text-[10px] font-pixel text-red-500 animate-pulse">刪除？</span>
+                      <button
+                        className="retro-button bg-red-950/60 border-red-500 text-red-400 text-[8px] py-1 px-2 hover:bg-red-900"
+                        onClick={() => {
+                          onDeleteUser(user.id);
+                          setDeletingUserId(null);
+                        }}
+                      >
+                        是 [YES]
+                      </button>
+                      <button
+                        className="retro-button bg-transparent border-primary/40 text-primary/70 text-[8px] py-1 px-2 hover:border-primary"
+                        onClick={() => setDeletingUserId(null)}
+                      >
+                        否 [NO]
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      className="p-2 text-primary hover:text-red-500 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeletingUserId(user.id);
+                      }}
+                    >
+                      <Trash className="h-5 w-5" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
