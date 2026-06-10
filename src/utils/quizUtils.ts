@@ -5,9 +5,9 @@ export const parseCSV = (csvString: string): VocabWord[] => {
   const lines = csvString.trim().split('\n');
   
   return lines.map((line, index) => {
-    const [chinese, english] = line.split(',').map(item => item.trim());
+    const [english, chinese] = line.split(',').map(item => item.trim());
     
-    if (!chinese || !english) {
+    if (!english || !chinese) {
       console.error(`Invalid line in CSV: ${line}`);
       return null;
     }

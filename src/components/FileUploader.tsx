@@ -111,7 +111,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
               投放 CSV 秘笈至此，或點擊開啟
             </p>
             <p className="font-pixel text-[8px] text-primary/40 mb-2">
-              格式: 中文, 英文 (每行一組)
+              格式: 英文, 中文 (每行一組)
             </p>
             {/* 格式說明按鈕 */}
             <button
@@ -162,7 +162,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
               <p className="font-pixel text-[10px] text-primary/80 mb-2">▸ 基本規則</p>
               <ul className="font-vt323 text-sm text-primary/90 space-y-1 list-disc list-inside">
                 <li>每行一組單字</li>
-                <li>中文與英文之間用<span className="text-yellow-400 font-bold">半形逗號 ,</span> 分隔</li>
+                <li>英文與中文之間用<span className="text-yellow-400 font-bold">半形逗號 ,</span> 分隔</li>
                 <li>檔案須為 <span className="text-yellow-400">.csv</span> 或 <span className="text-yellow-400">.txt</span> 格式</li>
                 <li>編碼建議使用 <span className="text-yellow-400">UTF-8</span></li>
               </ul>
@@ -172,14 +172,14 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
             <div className="p-3 bg-black/60 border border-primary/30 rounded">
               <p className="font-pixel text-[10px] text-primary/80 mb-2">▸ 範例內容（words.csv）</p>
               <pre className="font-vt323 text-sm text-green-400 leading-relaxed whitespace-pre-wrap">
-{`蘋果, apple
-香蕉, banana
-貓咪, cat
-狗, dog
-書本, book
-電腦, computer
-老師, teacher
-學生, student`}
+{`apple, 蘋果
+banana, 香蕉
+cat, 貓咪
+dog, 狗
+book, 書本
+computer, 電腦
+teacher, 老師
+student, 學生`}
               </pre>
             </div>
 
@@ -188,7 +188,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
               <p className="font-pixel text-[10px] text-yellow-400/80 mb-2">⚠ 注意事項</p>
               <ul className="font-vt323 text-sm text-primary/70 space-y-1 list-disc list-inside">
                 <li>空白行會被自動忽略</li>
-                <li>缺少中文或英文的行會被跳過</li>
+                <li>缺少英文或中文的行會被跳過</li>
                 <li>前後空白會自動移除</li>
               </ul>
             </div>
