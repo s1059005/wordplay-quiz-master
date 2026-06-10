@@ -71,7 +71,9 @@ const Index = () => {
           return {
             ...user,
             quizHistory: user.quizHistory || [],
-            wordScores
+            wordScores,
+            passCount: user.passCount || 0,
+            hasCountedThisPass: user.hasCountedThisPass || false
           };
         });
 
@@ -143,6 +145,10 @@ const Index = () => {
             ...user,
             words: loadedWords,
             wordScores: {}, // 清除舊題庫的學習進度
+            completionMessage1: undefined,
+            completionMessage2: undefined,
+            passCount: 0,
+            hasCountedThisPass: false,
             lastFileUpload: {
               fileName,
               uploadDate: new Date().toISOString()
@@ -162,14 +168,15 @@ const Index = () => {
     setDismissedCompletion(false);
   };
 
-  const handleUpdateCompletionMessage = (message: string) => {
+  const handleUpdateCompletionMessages = (message1: string, message2: string) => {
     if (!selectedUserId) return;
     setUsers(prev => {
       const updatedUsers = prev.map(user => {
         if (user.id === selectedUserId) {
           return {
             ...user,
-            completionMessage: message
+            completionMessage1: message1,
+            completionMessage2: message2
           };
         }
         return user;
@@ -179,6 +186,7 @@ const Index = () => {
       return updatedUsers;
     });
   };
+
 
   const handleStartQuiz = (settings: QuizSettingsType, selectedWords: VocabWord[]) => {
     setQuizState({
@@ -294,7 +302,8 @@ const Index = () => {
       if (user.id === selectedUserId) {
         return {
           ...user,
-          wordScores: {}
+          wordScores: {},
+          hasCountedThisPass: false
         };
       }
       return user;
@@ -316,6 +325,38 @@ const Index = () => {
   ).length ?? 0;
 
   const isAllWordsPassed = (selectedUser?.words?.length ?? 0) > 0 && availableWords.length === 0;
+
+  // 監聽並在通關時累計通關次數 passCount
+  useEffect(() => {
+    if (selectedUser && isAllWordsPassed && !selectedUser.hasCountedThisPass) {
+      setUsers(prev => {
+        const updatedUsers = prev.map(user => {
+          if (user.id === selectedUserId) {
+            return {
+              ...user,
+              passCount: (user.passCount || 0) + 1,
+              hasCountedThisPass: true
+            };
+          }
+          return user;
+        });
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updatedUsers));
+        return updatedUsers;
+      });
+    }
+  }, [isAllWordsPassed, selectedUserId, selectedUser?.hasCountedThisPass]);
+
+  // 決定通關祝賀詞
+  let currentCompletionMessage = "";
+  const passCount = selectedUser?.passCount || 0;
+  if (passCount === 1) {
+    currentCompletionMessage = selectedUser?.completionMessage1 || "恭喜你！首次順利通關，得到一個禮物！";
+  } else if (passCount === 2) {
+    currentCompletionMessage = selectedUser?.completionMessage2 || "恭喜你！第二次順利通關，再次獲得獎勵！";
+  } else if (passCount >= 3) {
+    // 固定的鼓勵獎勵，有復古冒險風格且富含能量
+    currentCompletionMessage = "修行之路永無止境，你的毅力令人敬佩！恭喜再次通關，繼續在詞靈的世界裡挑戰自我吧！";
+  }
 
   const selectedUserHistory = selectedUser?.quizHistory || [];
 
@@ -415,7 +456,7 @@ const Index = () => {
                 {isAllWordsPassed && !dismissedCompletion ? (
                   <QuizCompletion
                     userName={selectedUser?.name || ""}
-                    completionMessage={selectedUser?.completionMessage}
+                    completionMessage={currentCompletionMessage}
                     onReset={handleResetProgress}
                     onBackToHome={() => {
                       setDismissedCompletion(true);
@@ -453,7 +494,7 @@ const Index = () => {
                       <FileUploader
                         onWordsLoaded={handleWordsLoaded}
                         selectedUser={selectedUser}
-                        onUpdateCompletionMessage={handleUpdateCompletionMessage}
+                        onUpdateCompletionMessages={handleUpdateCompletionMessages}
                       />
                       <QuizSettings 
                         words={availableWords} 

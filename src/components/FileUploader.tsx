@@ -16,14 +16,15 @@ import { Upload, HelpCircle } from "lucide-react";
 interface FileUploaderProps {
   onWordsLoaded: (words: VocabWord[], fileName: string) => void;
   selectedUser?: User | null;
-  onUpdateCompletionMessage?: (message: string) => void;
+  onUpdateCompletionMessages?: (message1: string, message2: string) => void;
 }
 
-const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser, onUpdateCompletionMessage }) => {
+const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser, onUpdateCompletionMessages }) => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [showFormatHelp, setShowFormatHelp] = useState<boolean>(false);
   const [showCompletionMessageDialog, setShowCompletionMessageDialog] = useState<boolean>(false);
-  const [completionMessageInput, setCompletionMessageInput] = useState<string>("");
+  const [completionMessage1Input, setCompletionMessage1Input] = useState<string>("");
+  const [completionMessage2Input, setCompletionMessage2Input] = useState<string>("");
 
   const handleFileChange = (file: File) => {
     const reader = new FileReader();
@@ -41,8 +42,9 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
         toast.success(`已從 ${file.name} 載入 ${words.length} 個單字`);
         
         // Show completion message dialog after successful upload
-        if (onUpdateCompletionMessage) {
-          setCompletionMessageInput(selectedUser?.completionMessage || "");
+        if (onUpdateCompletionMessages) {
+          setCompletionMessage1Input(selectedUser?.completionMessage1 || "");
+          setCompletionMessage2Input(selectedUser?.completionMessage2 || "");
           setShowCompletionMessageDialog(true);
         }
       } catch (error) {
@@ -73,8 +75,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onWordsLoaded, selectedUser
   };
 
   const handleSaveCompletionMessage = () => {
-    if (onUpdateCompletionMessage) {
-      onUpdateCompletionMessage(completionMessageInput);
+    if (onUpdateCompletionMessages) {
+      onUpdateCompletionMessages(completionMessage1Input, completionMessage2Input);
       toast.success("已儲存通關祝賀詞！");
     }
     setShowCompletionMessageDialog(false);
@@ -211,15 +213,28 @@ student, 學生`}
 
           <div className="space-y-4 mt-4">
             <div className="space-y-2">
-              <label htmlFor="completionMessage" className="font-vt323 text-primary text-sm">
-                祝賀詞內容 [MESSAGE]
+              <label htmlFor="completionMessage1" className="font-pixel text-[10px] text-primary">
+                第一則：第一次過關獎勵文字 [1ST PASS REWARD]
               </label>
               <textarea
-                id="completionMessage"
-                value={completionMessageInput}
-                onChange={(e) => setCompletionMessageInput(e.target.value)}
-                placeholder="例如：恭喜你! 通過, 得到一個禮物"
-                className="w-full bg-black/40 border-2 border-primary/40 rounded p-3 text-primary font-vt323 h-24 focus:border-primary focus:outline-none transition-colors"
+                id="completionMessage1"
+                value={completionMessage1Input}
+                onChange={(e) => setCompletionMessage1Input(e.target.value)}
+                placeholder="例如：恭喜你！首次順利通關，得到一個禮物！"
+                className="w-full bg-black/40 border-2 border-primary/40 rounded p-3 text-primary font-vt323 h-20 focus:border-primary focus:outline-none transition-colors text-sm"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="completionMessage2" className="font-pixel text-[10px] text-primary">
+                第二則：第二次過關獎勵文字 [2ND PASS REWARD]
+              </label>
+              <textarea
+                id="completionMessage2"
+                value={completionMessage2Input}
+                onChange={(e) => setCompletionMessage2Input(e.target.value)}
+                placeholder="例如：恭喜你！第二次順利通關，再次獲得獎勵！"
+                className="w-full bg-black/40 border-2 border-primary/40 rounded p-3 text-primary font-vt323 h-20 focus:border-primary focus:outline-none transition-colors text-sm"
               />
             </div>
 
