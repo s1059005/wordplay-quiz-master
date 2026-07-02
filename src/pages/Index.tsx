@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Progress } from "@/components/ui/progress";
 import StoryPlayer from "@/components/StoryPlayer";
 import SpiritCodex from "@/components/SpiritCodex";
+import VocabManager from "@/components/VocabManager";
 
 
 // Local storage key for users
@@ -26,7 +27,7 @@ const Index = () => {
   const [quizState, setQuizState] = useState<QuizState | null>(null);
   const [showHistory, setShowHistory] = useState<boolean>(false);
   const [showStoryPlayer, setShowStoryPlayer] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'home' | 'codex'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'codex' | 'manage'>('home');
   const [dismissedCompletion, setDismissedCompletion] = useState<boolean>(false);
 
 
@@ -188,6 +189,25 @@ const Index = () => {
       return updatedUsers;
     });
   };
+
+  const handleUpdateWords = (updatedWords: VocabWord[]) => {
+    if (!selectedUserId) return;
+    setUsers(prev => {
+      const updatedUsers = prev.map(user => {
+        if (user.id === selectedUserId) {
+          return {
+            ...user,
+            words: updatedWords
+          };
+        }
+        return user;
+      });
+      // 立即寫入 localStorage 確保資料不遺失
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updatedUsers));
+      return updatedUsers;
+    });
+  };
+
 
 
   const handleStartQuiz = (settings: QuizSettingsType, selectedWords: VocabWord[]) => {
@@ -429,6 +449,12 @@ const Index = () => {
               </span>
             )}
           </button>
+          <button
+            className={`retro-tab ${activeTab === 'manage' ? 'retro-tab-active' : ''}`}
+            onClick={() => setActiveTab('manage')}
+          >
+            🛠️ 題庫微調
+          </button>
         </div>
       )}
 
@@ -438,6 +464,11 @@ const Index = () => {
           <SpiritCodex
             words={selectedUser.words}
             wordScores={selectedUser.wordScores}
+          />
+        ) : activeTab === 'manage' && selectedUser && !quizState && !showHistory ? (
+          <VocabManager
+            words={selectedUser.words}
+            onUpdateWords={handleUpdateWords}
           />
         ) : !quizState && !showHistory ? (
           <>
