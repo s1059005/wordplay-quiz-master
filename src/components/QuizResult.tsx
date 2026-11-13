@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { QuizState } from "@/types";
 import { calculateScore } from "@/utils/quizUtils";
+import { PLAYER_MAX_HP, getBattleRank, getMaxCombo, getPlayerHp } from "@/utils/battleUtils";
 import { CheckCircle, XCircle } from "lucide-react";
 
 interface QuizResultProps {
@@ -25,6 +26,9 @@ interface QuizResultProps {
 
 const QuizResult: React.FC<QuizResultProps> = ({ quizState, onRestart }) => {
   const score = calculateScore(quizState.answers);
+  const maxCombo = getMaxCombo(quizState.answers);
+  const hpLeft = getPlayerHp(quizState.answers);
+  const rank = getBattleRank(score.percentage, hpLeft);
   
   return (
     <div className="w-full max-w-2xl mx-auto py-8">
@@ -43,6 +47,21 @@ const QuizResult: React.FC<QuizResultProps> = ({ quizState, onRestart }) => {
             <p className="font-vt323 text-primary/80 text-xl mt-2">
               成功討伐 {score.correct} 隻詞靈 (共 {score.total} 隻)
             </p>
+          </div>
+
+          {/* 戰鬥統計 */}
+          <div className="grid grid-cols-4 gap-2 text-center">
+            {[
+              { label: '評價', value: rank, color: rank === 'S' ? 'text-yellow-300' : rank === 'A' ? 'text-green-400' : rank === 'B' ? 'text-sky-300' : 'text-gray-400' },
+              { label: '最高連擊', value: `×${maxCombo}`, color: 'text-yellow-300' },
+              { label: '受到傷害', value: `${score.total - score.correct}`, color: 'text-red-400' },
+              { label: '剩餘 HP', value: `${hpLeft}/${PLAYER_MAX_HP}`, color: 'text-pink-300' },
+            ].map(s => (
+              <div key={s.label} className="bg-black/40 border-2 border-primary/20 py-3">
+                <p className="font-pixel text-[8px] text-primary/60 mb-1">{s.label}</p>
+                <p className={`font-pixel text-lg ${s.color}`}>{s.value}</p>
+              </div>
+            ))}
           </div>
           
           <div className="border-2 border-primary/20 bg-black/20 overflow-hidden">

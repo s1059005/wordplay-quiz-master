@@ -911,10 +911,15 @@ function parsePattern(species: SpiritSpecies): PixelGrid {
 
 // ─── Props ────────────────────────────────────────────
 
+export type SpiritAnimState =
+  | 'appear' | 'idle' | 'captured' | 'escaped'
+  | 'hurt' | 'attack' | 'dodge' | 'retreat';
+
 export interface WordSpiritAvatarProps {
   wordId: string;
   wordScore: number;       // 用於決定等級 / 大小
-  animState?: 'appear' | 'idle' | 'captured' | 'escaped';
+  animState?: SpiritAnimState;
+  showLabels?: boolean;    // 是否顯示等級與名稱（戰鬥畫面中由 HUD 顯示）
 }
 
 // ─── 元件 ─────────────────────────────────────────────
@@ -923,6 +928,7 @@ const WordSpiritAvatar: React.FC<WordSpiritAvatarProps> = ({
   wordId,
   wordScore,
   animState = 'idle',
+  showLabels = true,
 }) => {
   const spirit = useMemo(() => generateWordSpirit(wordId), [wordId]);
   const level  = useMemo(() => getSpiritLevel(wordScore), [wordScore]);
@@ -941,13 +947,19 @@ const WordSpiritAvatar: React.FC<WordSpiritAvatarProps> = ({
   };
 
   // 動畫 class
-  const animClass =
-    animState === 'appear'   ? 'spirit-appear'   :
-    animState === 'captured' ? 'spirit-captured'  :
-    animState === 'escaped'  ? 'spirit-escaped'   :
-                               'spirit-idle';
+  const ANIM_CLASS: Record<SpiritAnimState, string> = {
+    appear:   'spirit-appear',
+    idle:     level >= 3 ? 'spirit-idle-fast' : 'spirit-idle',
+    captured: 'spirit-captured',
+    escaped:  'spirit-escaped',
+    hurt:     'spirit-hurt',
+    attack:   'spirit-attack',
+    dodge:    'spirit-dodge',
+    retreat:  'spirit-retreat',
+  };
+  const animClass = ANIM_CLASS[animState];
 
-  // 等級光暈
+  // 等級光暈（只負責 filter，不含 animation，避免覆蓋動作動畫）
   const glowClass =
     level >= 3 ? 'spirit-glow-intense' :
     level >= 2 ? 'spirit-glow-mild'    :
@@ -956,16 +968,19 @@ const WordSpiritAvatar: React.FC<WordSpiritAvatarProps> = ({
   return (
     <div className="flex flex-col items-center gap-2">
       {/* 等級標示 */}
-      <div className={`font-pixel text-[10px] tracking-wider ${
-        level >= 3 ? 'text-red-400 animate-pulse' :
-        level >= 2 ? 'text-orange-400' :
-                     'text-primary/60'
-      }`}>
-        {level >= 3 ? '★★★ BERSERK' : level >= 2 ? '★★ EVOLVED' : '★ NORMAL'}
-      </div>
+      {showLabels && (
+        <div className={`font-pixel text-[10px] tracking-wider ${
+          level >= 3 ? 'text-red-400 animate-pulse' :
+          level >= 2 ? 'text-orange-400' :
+                       'text-primary/60'
+        }`}>
+          {level >= 3 ? '★★★ BERSERK' : level >= 2 ? '★★ EVOLVED' : '★ NORMAL'}
+        </div>
+      )}
 
       {/* 像素動物 SVG */}
-      <div className={`${animClass} ${glowClass} relative`}>
+      <div className={animClass}>
+      <div className={`${glowClass} relative`}>
         {level >= 2 && (
           <div className="absolute inset-0 spirit-aura" style={{
             boxShadow: level >= 3
@@ -997,16 +1012,19 @@ const WordSpiritAvatar: React.FC<WordSpiritAvatarProps> = ({
           )}
         </svg>
       </div>
+      </div>
 
       {/* 詞靈名稱 */}
-      <div className={`font-pixel text-sm tracking-widest ${
-        level >= 3 ? 'text-red-400' :
-        level >= 2 ? 'text-orange-300' :
-                     'text-primary/80'
-      }`}>
-        {spirit.spiritName}
-        {level >= 2 && <span className="ml-1 text-[10px] opacity-70">Lv.{level}</span>}
-      </div>
+      {showLabels && (
+        <div className={`font-pixel text-sm tracking-widest ${
+          level >= 3 ? 'text-red-400' :
+          level >= 2 ? 'text-orange-300' :
+                       'text-primary/80'
+        }`}>
+          {spirit.spiritName}
+          {level >= 2 && <span className="ml-1 text-[10px] opacity-70">Lv.{level}</span>}
+        </div>
+      )}
     </div>
   );
 };
